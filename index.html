@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>にこにこ買取 | トレカ買取価格表</title>
+  <meta name="description" content="にこにこ買取のトレーディングカード買取価格表。ポケモンカード・ONE PIECE・ドラゴンボールの最新買取価格をご確認いただけます。">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- ヘッダー -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="logo">
+        <span class="logo-icon">😊</span>
+        <div class="logo-text">
+          <h1>にこにこ買取</h1>
+          <p class="logo-sub">トレカ買取価格表</p>
+        </div>
+      </div>
+      <div class="header-info">
+        <div class="update-date" id="updateDate">読み込み中...</div>
+        <p class="header-note">買取価格は翌日到着分のみ有効です</p>
+      </div>
+    </div>
+  </header>
+
+  <!-- カテゴリタブ -->
+  <nav class="tab-nav">
+    <div class="tab-nav-inner">
+      <button class="tab-btn active" data-category="pokemon">
+        <span class="tab-icon">⚡</span>
+        <span class="tab-label">ポケモンカード</span>
+      </button>
+      <button class="tab-btn" data-category="onepiece">
+        <span class="tab-icon">🏴‍☠️</span>
+        <span class="tab-label">ONE PIECE</span>
+      </button>
+      <button class="tab-btn" data-category="dragonball">
+        <span class="tab-icon">🐉</span>
+        <span class="tab-label">ドラゴンボール</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- メインコンテンツ -->
+  <main class="main">
+    <div class="main-inner">
+      <!-- 検索バー -->
+      <div class="search-bar">
+        <div class="search-input-wrap">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+          </svg>
+          <input type="text" id="searchInput" class="search-input" placeholder="商品名・型式で検索...">
+          <button id="clearSearch" class="clear-search" style="display:none;">✕</button>
+        </div>
+        <div class="result-count" id="resultCount"></div>
+      </div>
+
+      <!-- ローディング -->
+      <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <p>価格データを読み込み中...</p>
+      </div>
+
+      <!-- エラー -->
+      <div class="error" id="error" style="display:none;">
+        <p class="error-icon">⚠️</p>
+        <p class="error-msg">データの読み込みに失敗しました</p>
+        <button class="retry-btn" onclick="loadAllData()">再試行</button>
+      </div>
+
+      <!-- 価格テーブル -->
+      <div class="table-wrap" id="tableWrap" style="display:none;">
+        <!-- グリッド表示 -->
+        <div class="price-grid" id="priceGrid"></div>
+
+        <!-- テーブル表示（リスト切り替え用） -->
+        <div class="price-table-wrap" id="priceTableWrap" style="display:none;">
+          <table class="price-table" id="priceTable">
+            <thead>
+              <tr>
+                <th class="th-image">画像</th>
+                <th class="th-name sortable" data-sort="name">商品名 <span class="sort-arrow"></span></th>
+                <th class="th-model sortable" data-sort="model">型式 <span class="sort-arrow"></span></th>
+                <th class="th-price sortable" data-sort="shrink">シュリンクあり <span class="sort-arrow"></span></th>
+                <th class="th-price sortable" data-sort="noshrink">シュリンクなし <span class="sort-arrow"></span></th>
+              </tr>
+            </thead>
+            <tbody id="priceTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- フッター -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-info">
+        <p class="footer-brand">😊 にこにこ買取</p>
+        <p class="footer-note">※ 買取価格は毎日更新されます。最新の価格はこのページをご確認ください。</p>
+        <p class="footer-note">※ シュリンクなし価格が空欄の商品は、シュリンクなしでのお取り扱いがございません。</p>
+      </div>
+      <div class="footer-links">
+        <a href="https://x.com/niko_kaitori" target="_blank" rel="noopener noreferrer" class="footer-link">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          @niko_kaitori
+        </a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

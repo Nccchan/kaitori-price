@@ -1,0 +1,17 @@
+{
+  "pokemon": {
+    "M1L": "./images/pokemon/M1L.png",
+    "M1S": "./images/pokemon/M1S.png",
+    "M2": "./images/pokemon/M2.png",
+    "M2a": "./images/pokemon/M2a.png",
+    "M3": "./images/pokemon/M3.png",
+    "SV10": "./images/pokemon/SV10.png",
+    "SV11B": "./images/pokemon/SV11B.png",
+    "SV11W": "./images/pokemon/SV11W.png",
+    "SV8a": "./images/pokemon/SV8a.png",
+    "SV9": "./images/pokemon/SV9.png",
+    "SV9a": "./images/pokemon/SV9a.png"
+  },
+  "onepiece": {},
+  "dragonball": {}
+}
