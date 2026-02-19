@@ -18,6 +18,7 @@ const els = {
   loading: document.getElementById('loading'),
   error: document.getElementById('error'),
   retryBtn: document.getElementById('retryBtn'),
+  notices: document.getElementById('notices'),
   grid: document.getElementById('grid'),
   tablewrap: document.getElementById('tablewrap'),
   tbody: document.getElementById('tbody'),
@@ -32,7 +33,11 @@ const els = {
   shareNoShrink: document.getElementById('shareNoShrink'),
 };
 
-let allData = { pokemon: [], onepiece: [], dragonball: [] };
+let allData = {
+  pokemon: { items: [], notices: [] },
+  onepiece: { items: [], notices: [] },
+  dragonball: { items: [], notices: [] },
+};
 let activeCategory = 'pokemon';
 let viewMode = 'card'; // 'card' | 'table'
 
@@ -74,6 +79,9 @@ function extractUpdatedAt(rows) {
 function toItems(gviz) {
   const rows = gviz?.table?.rows || [];
   const items = [];
+  const notices = [];
+  const modelRe = /^[A-Za-z0-9][A-Za-z0-9-]*$/;
+  let startedProducts = false;
 
   for (const r of rows) {
     // このシートはA列に日付が入るため、実データはB〜E列を読む
@@ -84,19 +92,31 @@ function toItems(gviz) {
 
     const n = String(name || '').trim();
     const m = String(model || '').trim();
+    const s = String(shrink || '').trim();
+    const ns = String(noshrink || '').trim();
 
     if (!n || n === '商品名') continue;
     if (n.startsWith('買取価格')) continue;
+    if (n.includes('シュリンク') && !m && !s && !ns) continue;
 
-    items.push({
-      name: n,
-      model: m,
-      shrink: shrink,
-      noshrink: noshrink,
-    });
+    const hasPrice = !!s || !!ns;
+    const isModelCode = !!m && modelRe.test(m);
+    const isProductRow = isModelCode || hasPrice;
+
+    // お知らせは「最初の商品の前にある注意文」だけ拾う（それ以降の余計な行は無視）
+    if (!startedProducts) {
+      if (!isProductRow) {
+        if (!m && !s && !ns) notices.push({ text: n });
+        continue;
+      }
+      startedProducts = true;
+    }
+
+    if (!isProductRow) continue;
+    items.push({ name: n, model: m, shrink: shrink, noshrink: noshrink });
   }
 
-  return items;
+  return { items, notices };
 }
 
 function safeFileBase(s) {
@@ -206,13 +226,55 @@ function setViewMode(next) {
 
 function render() {
   const q = normalizeText(els.q.value);
-  const data = allData[activeCategory] || [];
+  const data = allData[activeCategory] || { items: [], notices: [] };
+
+  const items = data.items || [];
+  const notices = data.notices || [];
 
   const filtered = q
-    ? data.filter((it) => normalizeText(`${it.name} ${it.model}`).includes(q))
-    : data;
+    ? items.filter((it) => normalizeText(`${it.name} ${it.model}`).includes(q))
+    : items;
 
   els.count.textContent = `${filtered.length} 件`;
+
+  // notices (show only when not searching)
+  if (els.notices) {
+    els.notices.innerHTML = '';
+    const lines = (notices || [])
+      .map((n) => String(n?.text || '').trim())
+      .filter(Boolean);
+    const show = !q && lines.length > 0;
+    els.notices.hidden = !show;
+    if (show) {
+      const box = document.createElement('div');
+      box.className = 'notice';
+
+      const row = document.createElement('div');
+      row.className = 'notice__row';
+
+      const icon = document.createElement('div');
+      icon.className = 'notice__icon';
+      icon.textContent = 'i';
+
+      const body = document.createElement('div');
+      const text = document.createElement('div');
+      text.className = 'notice__text';
+      text.textContent = 'お知らせ';
+
+      const sub = document.createElement('div');
+      sub.className = 'notice__sub';
+      sub.textContent = lines.join('\n');
+
+      body.appendChild(text);
+      body.appendChild(sub);
+
+      row.appendChild(icon);
+      row.appendChild(body);
+
+      box.appendChild(row);
+      els.notices.appendChild(box);
+    }
+  }
 
   // grid
   els.grid.innerHTML = '';
@@ -333,7 +395,8 @@ async function loadCategory(key) {
   if (!res.ok) throw new Error(`fetch failed: ${res.status}`);
   const text = await res.text();
   const gviz = parseGviz(text);
-  return { gviz, items: toItems(gviz) };
+  const parsed = toItems(gviz);
+  return { gviz, items: parsed.items, notices: parsed.notices };
 }
 
 async function loadAllData() {
@@ -347,9 +410,9 @@ async function loadAllData() {
       loadCategory('dragonball'),
     ]);
 
-    allData.pokemon = p.items;
-    allData.onepiece = o.items;
-    allData.dragonball = d.items;
+    allData.pokemon = { items: p.items, notices: p.notices };
+    allData.onepiece = { items: o.items, notices: o.notices };
+    allData.dragonball = { items: d.items, notices: d.notices };
 
     const updated =
       extractUpdatedAt(p.gviz?.table?.rows || []) ||
