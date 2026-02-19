@@ -21,6 +21,15 @@ const els = {
   grid: document.getElementById('grid'),
   tablewrap: document.getElementById('tablewrap'),
   tbody: document.getElementById('tbody'),
+  shareModal: document.getElementById('shareModal'),
+  shareClose: document.getElementById('shareClose'),
+  shareCategory: document.getElementById('shareCategory'),
+  shareUpdatedAt: document.getElementById('shareUpdatedAt'),
+  shareImg: document.getElementById('shareImg'),
+  shareName: document.getElementById('shareName'),
+  shareModel: document.getElementById('shareModel'),
+  shareShrink: document.getElementById('shareShrink'),
+  shareNoShrink: document.getElementById('shareNoShrink'),
 };
 
 let allData = { pokemon: [], onepiece: [], dragonball: [] };
@@ -99,12 +108,34 @@ function safeFileBase(s) {
 }
 
 function getManifestPath(categoryKey, model) {
-  const safe = safeFileBase(model);
-  return (
-    imageManifest?.[categoryKey]?.[model] ||
-    (safe && imageManifest?.[categoryKey]?.[safe]) ||
-    ''
-  );
+  const raw = String(model || '').trim();
+  const safe = safeFileBase(raw);
+  const keys = [];
+
+  // as-is / safe
+  if (raw) keys.push(raw);
+  if (safe) keys.push(safe);
+
+  // common variants: normalize hyphen variants + strip suffix after first hyphen
+  const norm = raw
+    .replace(/[‐‑‒–—−ー－]/g, '-')
+    .replace(/\s+/g, '')
+    .trim();
+  const normSafe = safeFileBase(norm);
+
+  if (norm && !keys.includes(norm)) keys.push(norm);
+  if (normSafe && !keys.includes(normSafe)) keys.push(normSafe);
+
+  const base = norm.split('-')[0] || '';
+  const baseSafe = safeFileBase(base);
+  if (base && !keys.includes(base)) keys.push(base);
+  if (baseSafe && !keys.includes(baseSafe)) keys.push(baseSafe);
+
+  for (const k of keys) {
+    const path = imageManifest?.[categoryKey]?.[k];
+    if (path) return path;
+  }
+  return '';
 }
 
 function createImg(categoryKey, model, size) {
@@ -123,6 +154,40 @@ function createImg(categoryKey, model, size) {
 
   wrap.appendChild(img);
   return wrap;
+}
+
+function setModalOpen(isOpen) {
+  document.documentElement.classList.toggle('is-modal-open', isOpen);
+  document.body.classList.toggle('is-modal-open', isOpen);
+}
+
+function openShare(it) {
+  if (!els.shareModal) return;
+  const catLabel = CATEGORIES?.[activeCategory]?.label || '';
+  const updated = els.updatedAt?.textContent || '—';
+
+  els.shareCategory.textContent = catLabel;
+  els.shareUpdatedAt.textContent = updated;
+  els.shareName.textContent = it?.name || '';
+  els.shareModel.textContent = it?.model ? `型式: ${it.model}` : '';
+  els.shareShrink.textContent = it?.shrink || '—';
+  els.shareNoShrink.textContent = it?.noshrink || '—';
+
+  const path = getManifestPath(activeCategory, it?.model);
+  els.shareImg.alt = it?.model ? `${it.model}` : '';
+  els.shareImg.src = path || './images/placeholder.svg';
+  els.shareImg.onerror = () => {
+    els.shareImg.src = './images/placeholder.svg';
+  };
+
+  els.shareModal.hidden = false;
+  setModalOpen(true);
+}
+
+function closeShare() {
+  if (!els.shareModal) return;
+  els.shareModal.hidden = true;
+  setModalOpen(false);
 }
 
 function setStatus({ loading, error }) {
@@ -199,8 +264,18 @@ function render() {
     prices.appendChild(a);
     prices.appendChild(b);
 
+    const actions = document.createElement('div');
+    actions.className = 'card__actions';
+    const postBtn = document.createElement('button');
+    postBtn.className = 'postbtn';
+    postBtn.type = 'button';
+    postBtn.textContent = 'ポスト用';
+    postBtn.addEventListener('click', () => openShare(it));
+    actions.appendChild(postBtn);
+
     card.appendChild(top);
     card.appendChild(prices);
+    card.appendChild(actions);
 
     els.grid.appendChild(card);
   }
@@ -325,6 +400,17 @@ function wire() {
   });
 
   els.retryBtn.addEventListener('click', loadAllData);
+
+  if (els.shareClose) els.shareClose.addEventListener('click', closeShare);
+  if (els.shareModal) {
+    els.shareModal.addEventListener('click', (e) => {
+      const t = e.target;
+      if (t && t.dataset && t.dataset.shareClose) closeShare();
+    });
+  }
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && els.shareModal && !els.shareModal.hidden) closeShare();
+  });
 }
 
 wire();

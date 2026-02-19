@@ -1,0 +1,14 @@
+{
+  "name": "kaitori-price",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node scripts/admin_server.mjs",
+    "manifest": "node scripts/build_manifest.mjs"
+  },
+  "dependencies": {
+    "express": "^5.2.1",
+    "multer": "^2.0.2",
+    "sharp": "^0.34.5"
+  }
+}

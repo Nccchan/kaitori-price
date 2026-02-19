@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>画像アップロード | にこにこ買取</title>
+    <link rel="stylesheet" href="style.css" />
+    <style>
+      .admin {
+        margin-top: 18px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: rgba(255, 255, 255, 0.92);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+      }
+      .admin__head {
+        padding: 14px 14px;
+        border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+      .admin__title {
+        font-weight: 900;
+        margin: 0;
+        font-size: 16px;
+      }
+      .admin__sub {
+        margin: 4px 0 0;
+        color: var(--muted);
+        font-size: 12px;
+      }
+      .admin__body {
+        padding: 14px;
+      }
+      .form {
+        display: grid;
+        gap: 12px;
+        max-width: 780px;
+      }
+      .row {
+        display: grid;
+        gap: 8px;
+      }
+      .label {
+        font-weight: 800;
+        font-size: 13px;
+      }
+      .help {
+        color: var(--muted);
+        font-size: 12px;
+      }
+      .input,
+      .select {
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 10px 12px;
+        background: rgba(255, 255, 255, 0.92);
+        color: var(--text);
+        outline: none;
+      }
+      .input:focus,
+      .select:focus {
+        border-color: rgba(124, 58, 237, 0.6);
+        box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.12);
+      }
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+      }
+      .btn {
+        border: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.86);
+        color: var(--text);
+        padding: 10px 12px;
+        border-radius: 999px;
+        font-weight: 900;
+        cursor: pointer;
+      }
+      .btn.primary {
+        border-color: rgba(124, 58, 237, 0.35);
+        background: linear-gradient(135deg, rgba(124, 58, 237, 0.16), rgba(34, 197, 94, 0.10));
+      }
+      .btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+      .preview {
+        display: grid;
+        grid-template-columns: 92px 1fr;
+        gap: 12px;
+        align-items: center;
+        padding: 12px;
+        border: 1px solid rgba(15, 23, 42, 0.10);
+        border-radius: 14px;
+        background: rgba(15, 23, 42, 0.03);
+      }
+      .preview__img {
+        width: 92px;
+        height: 92px;
+        border-radius: 14px;
+        border: 1px solid rgba(15, 23, 42, 0.10);
+        background: rgba(255, 255, 255, 0.82);
+        overflow: hidden;
+      }
+      .preview__img img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+      .statusbox {
+        margin-top: 12px;
+        padding: 12px;
+        border: 1px solid rgba(15, 23, 42, 0.10);
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.82);
+        color: var(--muted);
+        font-size: 12px;
+        white-space: pre-wrap;
+      }
+      .pill {
+        display: inline-block;
+        border: 1px solid rgba(15, 23, 42, 0.12);
+        background: rgba(255, 255, 255, 0.82);
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        color: var(--muted);
+      }
+    </style>
+  </head>
+  <body>
+    <header class="header">
+      <div class="container header__inner">
+        <div class="brand">
+          <div class="brand__mark">🛠</div>
+          <div style="min-width: 0">
+            <div class="brand__title">管理画面</div>
+            <div class="brand__subtitle">画像アップロード（600x600）</div>
+          </div>
+        </div>
+        <div class="header__meta">
+          <a class="xlink" href="/" style="display:inline-block">価格表へ戻る</a>
+        </div>
+      </div>
+    </header>
+
+    <main class="main">
+      <div class="container">
+        <div class="admin">
+          <div class="admin__head">
+            <div>
+              <h2 class="admin__title">画像をアップロード</h2>
+              <div class="admin__sub">アップロードすると自動で 600x600 PNG にして保存し、manifest を更新します。</div>
+            </div>
+            <div class="pill">ローカル専用（127.0.0.1）</div>
+          </div>
+          <div class="admin__body">
+            <form id="form" class="form">
+              <div class="row">
+                <div class="label">カテゴリ</div>
+                <select id="category" class="select" required>
+                  <option value="pokemon">ポケモンカード</option>
+                  <option value="onepiece">ONE PIECE</option>
+                  <option value="dragonball">ドラゴンボール</option>
+                </select>
+                <div class="help">保存先: <code>images/&lt;カテゴリ&gt;/</code></div>
+              </div>
+
+              <div class="row">
+                <div class="label">型式（ファイル名）</div>
+                <input id="code" class="input" placeholder="例: SV11B / OP-01 / FB-05" required />
+                <div class="help">シートの「型式」と同じ値を推奨（例: <code>FB-05</code>）。</div>
+              </div>
+
+              <div class="row">
+                <div class="label">画像ファイル</div>
+                <input id="file" class="input" type="file" accept="image/*" required />
+                <div class="help">JPG/PNG/WebP などOK。アップロード後に 600x600 PNG に変換されます。</div>
+              </div>
+
+              <div id="preview" class="preview" style="display:none">
+                <div class="preview__img"><img id="previewImg" alt="" /></div>
+                <div>
+                  <div class="label" id="previewTitle"></div>
+                  <div class="help" id="previewSub"></div>
+                </div>
+              </div>
+
+              <div class="actions">
+                <button id="uploadBtn" class="btn primary" type="submit">アップロード</button>
+                <button id="clearBtn" class="btn" type="button">クリア</button>
+              </div>
+
+              <div id="status" class="statusbox" hidden></div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      const el = {
+        form: document.getElementById('form'),
+        category: document.getElementById('category'),
+        code: document.getElementById('code'),
+        file: document.getElementById('file'),
+        uploadBtn: document.getElementById('uploadBtn'),
+        clearBtn: document.getElementById('clearBtn'),
+        preview: document.getElementById('preview'),
+        previewImg: document.getElementById('previewImg'),
+        previewTitle: document.getElementById('previewTitle'),
+        previewSub: document.getElementById('previewSub'),
+        status: document.getElementById('status'),
+      };
+
+      function setStatus(text) {
+        el.status.hidden = !text;
+        el.status.textContent = text || '';
+      }
+
+      function resetForm() {
+        el.code.value = '';
+        el.file.value = '';
+        el.preview.style.display = 'none';
+        el.previewImg.src = '';
+        setStatus('');
+      }
+
+      el.clearBtn.addEventListener('click', resetForm);
+
+      el.file.addEventListener('change', () => {
+        const f = el.file.files && el.file.files[0];
+        if (!f) {
+          el.preview.style.display = 'none';
+          return;
+        }
+        const url = URL.createObjectURL(f);
+        el.previewImg.src = url;
+        el.previewTitle.textContent = f.name;
+        el.previewSub.textContent = `size: ${(f.size / 1024).toFixed(1)} KB`;
+        el.preview.style.display = '';
+      });
+
+      el.form.addEventListener('submit', async (ev) => {
+        ev.preventDefault();
+        const f = el.file.files && el.file.files[0];
+        const category = el.category.value;
+        const code = (el.code.value || '').trim();
+        if (!f || !category || !code) return;
+
+        el.uploadBtn.disabled = true;
+        setStatus('アップロード中...');
+        try {
+          const fd = new FormData();
+          fd.set('category', category);
+          fd.set('code', code);
+          fd.set('file', f);
+
+          const res = await fetch('/api/upload', { method: 'POST', body: fd });
+          const json = await res.json().catch(() => ({}));
+          if (!res.ok) {
+            throw new Error(json && json.error ? json.error : `upload failed: ${res.status}`);
+          }
+          setStatus(`OK\nsaved: ${json.savedPath}\nmanifest: updated\n\n価格表をリロードすると反映されます。`);
+        } catch (e) {
+          setStatus(`ERROR\n${e && e.message ? e.message : String(e)}`);
+        } finally {
+          el.uploadBtn.disabled = false;
+        }
+      });
+    </script>
+  </body>
+</html>
+
