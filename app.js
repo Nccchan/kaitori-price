@@ -349,7 +349,7 @@ function render() {
     const postBtn = document.createElement('button');
     postBtn.className = 'postbtn';
     postBtn.type = 'button';
-    postBtn.textContent = 'ポスト用';
+    postBtn.textContent = '詳細';
     postBtn.addEventListener('click', () => openShare(it));
     actions.appendChild(postBtn);
 

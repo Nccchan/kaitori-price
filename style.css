@@ -75,6 +75,7 @@ a{color:inherit}
 .notice__sub{margin-top:4px;color:var(--muted);font-size:12px;line-height:1.5;white-space:pre-wrap}
 
 .grid{display:grid;grid-template-columns:repeat(1,minmax(0,1fr));gap:12px;margin-top:14px}
+.grid[hidden]{display:none}
 @media (min-width:560px){.grid{grid-template-columns:repeat(2,minmax(0,1fr));}}
 @media (min-width:920px){.grid{grid-template-columns:repeat(3,minmax(0,1fr));}}
 
