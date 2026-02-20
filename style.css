@@ -187,6 +187,7 @@ a{color:inherit}
 
 /* Form */
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:400px){.form-row{grid-template-columns:1fr}}
 .form-field{margin-bottom:14px}
 .form-label{display:block;font-size:13px;font-weight:700;margin-bottom:6px}
 .form-required{display:inline-block;background:rgba(239,68,68,0.12);color:rgba(239,68,68,0.85);border-radius:4px;padding:1px 5px;font-size:11px;font-weight:700;margin-left:5px}
