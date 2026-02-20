@@ -20,9 +20,15 @@
           <div class="brand__subtitle">トレカ買取価格表</div>
         </div>
       </div>
-      <div class="header__meta">
-        <div class="header__updated">更新日: <span id="updatedAt">—</span></div>
-        <div class="header__note">買取価格は翌日到着分のみ有効です</div>
+      <div class="header__right">
+        <div class="header__meta">
+          <div class="header__updated">更新日: <span id="updatedAt">—</span></div>
+          <div class="header__note">買取価格は翌日到着分のみ有効です</div>
+        </div>
+        <button id="cartHeaderBtn" class="cart-header-btn" type="button" aria-label="カート (0点)">
+          🛒
+          <span id="cartBadge" class="cart-badge" hidden>0</span>
+        </button>
       </div>
     </div>
   </header>
@@ -74,6 +80,7 @@
               <th>型式</th>
               <th class="th-price">シュリンクあり</th>
               <th class="th-price">シュリンクなし</th>
+              <th class="th-action">申込</th>
             </tr>
           </thead>
           <tbody id="tbody"></tbody>
@@ -140,6 +147,94 @@
       </div>
     </div>
   </div>
+
+  <!-- シュリンク種別選択 -->
+  <div id="shrinkSelector" class="shrink-sel" hidden>
+    <div class="shrink-sel__bd" id="shrinkSelectorBd"></div>
+    <div class="shrink-sel__panel" role="dialog" aria-modal="true" aria-label="シュリンク種別選択">
+      <div class="shrink-sel__title">どちらで申し込みますか？</div>
+      <button id="shrinkShrinkBtn" class="shrink-sel__btn" type="button">
+        <span class="shrink-sel__item">シュリンクあり</span>
+        <span id="shrinkShrinkPrice" class="shrink-sel__price"></span>
+      </button>
+      <button id="shrinkNoshrinkBtn" class="shrink-sel__btn" type="button">
+        <span class="shrink-sel__item">シュリンクなし</span>
+        <span id="shrinkNoshrinkPrice" class="shrink-sel__price"></span>
+      </button>
+      <button id="shrinkSelectorCancel" class="shrink-sel__cancel" type="button">キャンセル</button>
+    </div>
+  </div>
+
+  <!-- カートモーダル -->
+  <div id="cartModal" class="cart-modal" hidden>
+    <div class="cart-modal__bd" id="cartModalBd"></div>
+    <div class="cart-modal__panel" role="dialog" aria-modal="true" aria-label="申込カート">
+      <div class="cart-modal__head">
+        <div class="cart-modal__title">申込カート</div>
+        <button id="cartModalClose" class="cart-modal__close" type="button">閉じる</button>
+      </div>
+      <div id="cartModalBody" class="cart-modal__body"></div>
+      <div id="cartModalFoot" class="cart-modal__foot"></div>
+    </div>
+  </div>
+
+  <!-- チェックアウトモーダル -->
+  <div id="checkoutModal" class="checkout-modal" hidden>
+    <div class="checkout-modal__bd" id="checkoutModalBd"></div>
+    <div class="checkout-modal__panel" role="dialog" aria-modal="true" aria-label="買取申込フォーム">
+      <div class="checkout-modal__head">
+        <div class="checkout-modal__title">買取申込フォーム</div>
+        <button id="checkoutModalClose" class="checkout-modal__close" type="button">閉じる</button>
+      </div>
+      <div class="checkout-modal__body">
+        <div id="checkoutForm">
+          <p class="checkout-modal__note">お名前と電話番号をご入力の上、申し込みボタンを押してください。</p>
+
+          <div id="checkoutCartPreview"></div>
+
+          <div class="form-row">
+            <div class="form-field">
+              <label class="form-label" for="co_last_name">氏名（姓）<span class="form-required">必須</span></label>
+              <input id="co_last_name" class="form-input" type="text" placeholder="田中" autocomplete="family-name">
+            </div>
+            <div class="form-field">
+              <label class="form-label" for="co_first_name">氏名（名）<span class="form-required">必須</span></label>
+              <input id="co_first_name" class="form-input" type="text" placeholder="太郎" autocomplete="given-name">
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label class="form-label" for="co_tel">電話番号<span class="form-required">必須</span></label>
+            <input id="co_tel" class="form-input" type="tel" placeholder="090-1234-5678" autocomplete="tel">
+          </div>
+
+          <div class="form-field">
+            <label class="form-label" for="co_email">メールアドレス</label>
+            <input id="co_email" class="form-input" type="email" placeholder="example@domain.com" autocomplete="email">
+          </div>
+
+          <div class="form-field">
+            <label class="form-label" for="co_comment">備考（任意）</label>
+            <textarea id="co_comment" class="form-input form-textarea" placeholder="何かあればご記入ください"></textarea>
+          </div>
+
+          <div id="checkoutError" class="checkout-error" hidden></div>
+
+          <button id="checkoutSubmit" class="checkout-submit" type="button">申し込む</button>
+        </div>
+
+        <div id="checkoutDone" class="checkout-done" hidden>
+          <div class="checkout-done__icon">✅</div>
+          <div class="checkout-done__title">お申し込みが完了しました</div>
+          <div class="checkout-done__text">ご利用いただきありがとうございました。<br>担当者よりご連絡いたします。</div>
+          <button id="checkoutDoneClose" class="checkout-submit checkout-submit--outline" type="button">閉じる</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- トースト通知 -->
+  <div id="cartToast" class="cart-toast" aria-live="polite"></div>
 
   <script src="app.js"></script>
 </body>
