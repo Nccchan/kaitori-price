@@ -10,9 +10,14 @@ const MEMBER_APP_URL = '';
 
 const CATEGORIES = {
   pokemon: { label: 'ポケモンカード', sheetName: 'ポケモン', imageDir: 'pokemon' },
-  onepiece: { label: 'ONE PIECE', sheetName: 'ワンピース', imageDir: 'onepiece' },
-  dragonball: { label: 'ドラゴンボール', sheetName: 'ドラゴンボール', imageDir: 'dragonball' },
+  onepiece: { label: 'ONE PIECE', sheetName: 'ワンピース', imageDir: 'onepiece', boxMode: true },
+  dragonball: { label: 'ドラゴンボール', sheetName: 'ドラゴンボール', imageDir: 'dragonball', boxMode: true },
 };
+
+function getCatLabels(categoryKey) {
+  if (CATEGORIES[categoryKey]?.boxMode) return { a: '箱', b: 'カートン' };
+  return { a: 'シュリンクあり', b: 'シュリンクなし' };
+}
 
 const els = {
   updatedAt: document.getElementById('updatedAt'),
@@ -209,6 +214,11 @@ function openShare(it) {
   els.shareModel.textContent = it?.model ? `型式: ${it.model}` : '';
   els.shareShrink.textContent = it?.shrink || '—';
   els.shareNoShrink.textContent = it?.noshrink || '—';
+  const { a: la, b: lb } = getCatLabels(activeCategory);
+  const shrinkLabelEl = document.getElementById('shareShrinkLabel');
+  const noshrinkLabelEl = document.getElementById('shareNoShrinkLabel');
+  if (shrinkLabelEl) shrinkLabelEl.textContent = la;
+  if (noshrinkLabelEl) noshrinkLabelEl.textContent = lb;
 
   const path = getManifestPath(activeCategory, it?.model);
   els.shareImg.alt = it?.model ? `${it.model}` : '';
@@ -244,6 +254,19 @@ function setViewMode(next) {
 function render() {
   const q = normalizeText(els.q.value);
   const data = allData[activeCategory] || { items: [], notices: [] };
+
+  // テーブルヘッダー・フッター注記をカテゴリに合わせて更新
+  const catLabels = getCatLabels(activeCategory);
+  const thShrink = document.getElementById('th-shrink');
+  const thNoshrink = document.getElementById('th-noshrink');
+  if (thShrink) thShrink.textContent = catLabels.a;
+  if (thNoshrink) thNoshrink.textContent = catLabels.b;
+  const footerNote = document.getElementById('footerNote');
+  if (footerNote) {
+    footerNote.textContent = CATEGORIES[activeCategory]?.boxMode
+      ? '※ カートン価格が空欄の商品は、カートンでのお取り扱いがございません。'
+      : '※ シュリンクなし価格が空欄の商品は、シュリンクなしでのお取り扱いがございません。';
+  }
 
   const items = data.items || [];
   const notices = data.notices || [];
@@ -324,9 +347,11 @@ function render() {
     const prices = document.createElement('div');
     prices.className = 'card__prices';
 
+    const labels = getCatLabels(activeCategory);
+
     const a = document.createElement('div');
     a.className = 'pricebox';
-    a.innerHTML = `<div class="pricebox__label">シュリンクあり</div>`;
+    a.innerHTML = `<div class="pricebox__label">${labels.a}</div>`;
     const av = document.createElement('div');
     av.className = 'pricebox__value' + (it.shrink ? '' : ' is-empty');
     av.textContent = it.shrink || '—';
@@ -334,7 +359,7 @@ function render() {
 
     const b = document.createElement('div');
     b.className = 'pricebox';
-    b.innerHTML = `<div class="pricebox__label">シュリンクなし</div>`;
+    b.innerHTML = `<div class="pricebox__label">${labels.b}</div>`;
     const bv = document.createElement('div');
     bv.className = 'pricebox__value' + (it.noshrink ? '' : ' is-empty');
     bv.textContent = it.noshrink || '—';
@@ -543,7 +568,8 @@ function saveCart() {
 function addToCart(item, categoryKey, shrinkType) {
   const rawPrice = shrinkType === 'shrink' ? item.shrink : item.noshrink;
   const price = parseInt(String(rawPrice || '0').replace(/[^0-9]/g, ''), 10) || 0;
-  const shrinkLabel = shrinkType === 'shrink' ? 'シュリンクあり' : 'シュリンクなし';
+  const { a: la, b: lb } = getCatLabels(categoryKey);
+  const shrinkLabel = shrinkType === 'shrink' ? la : lb;
 
   const existing = cart.find(
     (c) => c.model === item.model && c.category === categoryKey && c.shrinkType === shrinkType
@@ -640,6 +666,12 @@ function openShrinkSelector(item, categoryKey) {
   const noshrinkBtn = document.getElementById('shrinkNoshrinkBtn');
   const shrinkPrice = document.getElementById('shrinkShrinkPrice');
   const noshrinkPrice = document.getElementById('shrinkNoshrinkPrice');
+  const shrinkLabelEl = document.getElementById('shrinkShrinkLabel');
+  const noshrinkLabelEl = document.getElementById('shrinkNoshrinkLabel');
+
+  const { a: la, b: lb } = getCatLabels(categoryKey);
+  if (shrinkLabelEl) shrinkLabelEl.textContent = la;
+  if (noshrinkLabelEl) noshrinkLabelEl.textContent = lb;
 
   if (shrinkBtn) shrinkBtn.hidden = !item.shrink;
   if (noshrinkBtn) noshrinkBtn.hidden = !item.noshrink;

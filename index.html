@@ -81,8 +81,8 @@
               <th class="th-img">画像</th>
               <th>商品名</th>
               <th>型式</th>
-              <th class="th-price">シュリンクあり</th>
-              <th class="th-price">シュリンクなし</th>
+              <th class="th-price" id="th-shrink">シュリンクあり</th>
+              <th class="th-price" id="th-noshrink">シュリンクなし</th>
               <th class="th-action">申込</th>
             </tr>
           </thead>
@@ -97,7 +97,7 @@
       <div>
         <div class="footer__brand"><img src="images/logo_horizontal.png" alt="にこにこ買取" class="footer__logo"></div>
         <div class="footer__small">※ 買取価格は毎日更新されます。最新の価格はこのページをご確認ください。</div>
-        <div class="footer__small">※ シュリンクなし価格が空欄の商品は、シュリンクなしでのお取り扱いがございません。</div>
+        <div id="footerNote" class="footer__small">※ シュリンクなし価格が空欄の商品は、シュリンクなしでのお取り扱いがございません。</div>
       </div>
       <a class="xlink" href="https://x.com/niko_kaitori" target="_blank" rel="noopener noreferrer">X: @niko_kaitori</a>
     </div>
@@ -133,11 +133,11 @@
 
             <div class="share__prices">
               <div class="shareprice">
-                <div class="shareprice__label">シュリンクあり</div>
+                <div id="shareShrinkLabel" class="shareprice__label">シュリンクあり</div>
                 <div id="shareShrink" class="shareprice__value"></div>
               </div>
               <div class="shareprice">
-                <div class="shareprice__label">シュリンクなし</div>
+                <div id="shareNoShrinkLabel" class="shareprice__label">シュリンクなし</div>
                 <div id="shareNoShrink" class="shareprice__value"></div>
               </div>
             </div>
@@ -157,11 +157,11 @@
     <div class="shrink-sel__panel" role="dialog" aria-modal="true" aria-label="シュリンク種別選択">
       <div class="shrink-sel__title">どちらで申し込みますか？</div>
       <button id="shrinkShrinkBtn" class="shrink-sel__btn" type="button">
-        <span class="shrink-sel__item">シュリンクあり</span>
+        <span id="shrinkShrinkLabel" class="shrink-sel__item">シュリンクあり</span>
         <span id="shrinkShrinkPrice" class="shrink-sel__price"></span>
       </button>
       <button id="shrinkNoshrinkBtn" class="shrink-sel__btn" type="button">
-        <span class="shrink-sel__item">シュリンクなし</span>
+        <span id="shrinkNoshrinkLabel" class="shrink-sel__item">シュリンクなし</span>
         <span id="shrinkNoshrinkPrice" class="shrink-sel__price"></span>
       </button>
       <button id="shrinkSelectorCancel" class="shrink-sel__cancel" type="button">キャンセル</button>
