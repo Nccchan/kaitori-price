@@ -277,3 +277,59 @@ html.is-modal-open,body.is-modal-open{overflow:hidden}
 .terms-modal__decline:hover{background:var(--surface)}
 .terms-modal__agree{padding:10px 24px;border-radius:10px;border:none;background:linear-gradient(135deg,var(--primary),var(--secondary));color:#fff;font-weight:900;font-size:14px;cursor:pointer;box-shadow:0 4px 16px rgba(124,58,237,0.25)}
 .terms-modal__agree:hover{opacity:0.9}
+
+/* ===== AIチャットウィジェット ===== */
+.chat-widget{position:fixed;bottom:22px;right:18px;z-index:900;display:flex;flex-direction:column;align-items:flex-end;gap:10px}
+
+/* 開閉ボタン */
+.chat-toggle{display:flex;align-items:center;gap:6px;padding:12px 18px;border-radius:999px;border:none;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;font-size:14px;font-weight:800;cursor:pointer;box-shadow:0 6px 24px rgba(109,40,217,0.35);transition:transform 0.15s,box-shadow 0.15s}
+.chat-toggle:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(109,40,217,0.4)}
+.chat-toggle__icon{font-size:18px;line-height:1}
+.chat-toggle__label{letter-spacing:0.3px}
+
+/* チャットパネル */
+.chat-panel{width:min(360px,calc(100vw - 28px));background:#fff;border-radius:20px;box-shadow:0 20px 60px rgba(15,23,42,0.18);display:flex;flex-direction:column;overflow:hidden;max-height:min(520px,calc(100dvh - 110px))}
+.chat-panel[hidden]{display:none}
+.chat-panel__head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff}
+.chat-panel__headleft{display:flex;align-items:center;gap:10px}
+.chat-panel__avatar{font-size:26px;line-height:1}
+.chat-panel__title{font-size:15px;font-weight:900}
+.chat-panel__subtitle{font-size:11px;opacity:0.8;margin-top:1px}
+.chat-panel__close{background:none;border:none;color:#fff;font-size:16px;cursor:pointer;opacity:0.8;padding:4px 6px;border-radius:6px;line-height:1}
+.chat-panel__close:hover{opacity:1;background:rgba(255,255,255,0.15)}
+
+/* メッセージエリア */
+.chat-messages{flex:1;overflow-y:auto;padding:14px 12px;display:flex;flex-direction:column;gap:10px;background:#f6f7fb}
+
+/* 吹き出し */
+.chat-bubble{max-width:86%;display:flex}
+.chat-bubble--user{align-self:flex-end}
+.chat-bubble--assistant{align-self:flex-start}
+.chat-bubble__text{padding:10px 13px;border-radius:14px;font-size:13.5px;line-height:1.6;white-space:pre-wrap;word-break:break-word}
+.chat-bubble--user .chat-bubble__text{background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border-bottom-right-radius:4px}
+.chat-bubble--assistant .chat-bubble__text{background:#fff;color:rgba(15,23,42,0.92);border-bottom-left-radius:4px;box-shadow:0 2px 8px rgba(15,23,42,0.08)}
+
+/* タイピングインジケーター */
+.chat-bubble--typing{align-self:flex-start}
+.chat-bubble--typing span{display:inline-block;width:7px;height:7px;margin:0 2px;background:#7c3aed;border-radius:50%;animation:typingDot 1.2s infinite;vertical-align:middle}
+.chat-bubble--typing span:nth-child(2){animation-delay:0.2s}
+.chat-bubble--typing span:nth-child(3){animation-delay:0.4s}
+@keyframes typingDot{0%,60%,100%{transform:translateY(0);opacity:0.5}30%{transform:translateY(-5px);opacity:1}}
+
+/* クイックリプライ */
+.chat-quick-replies{display:flex;flex-wrap:wrap;gap:6px;padding:8px 12px 4px;background:#f6f7fb}
+.chat-quick-btn{padding:5px 12px;border-radius:999px;border:1.5px solid #7c3aed;background:#fff;color:#7c3aed;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;transition:background 0.1s,color 0.1s}
+.chat-quick-btn:hover{background:#7c3aed;color:#fff}
+
+/* 入力欄 */
+.chat-input-row{display:flex;align-items:flex-end;gap:8px;padding:10px 12px;border-top:1px solid rgba(15,23,42,0.08);background:#fff}
+.chat-input{flex:1;border:1.5px solid rgba(15,23,42,0.15);border-radius:12px;padding:8px 12px;font-size:14px;resize:none;outline:none;font-family:inherit;line-height:1.5;max-height:100px;overflow-y:auto;transition:border-color 0.15s}
+.chat-input:focus{border-color:#7c3aed}
+.chat-send{width:38px;height:38px;flex-shrink:0;border:none;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:opacity 0.15s}
+.chat-send:hover{opacity:0.85}
+.chat-send:disabled{opacity:0.4;cursor:not-allowed}
+
+@media(max-width:480px){
+  .chat-widget{bottom:16px;right:12px}
+  .chat-panel{width:calc(100vw - 24px)}
+}

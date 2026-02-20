@@ -1093,3 +1093,151 @@ function wireCart() {
 wire();
 wireCart();
 loadAllData();
+
+// ===== AIチャットウィジェット =====
+
+const CHAT_QUICK_REPLIES = [
+  '申込の流れを教えて',
+  '価格はどこで見られる？',
+  'シュリンクなしでも買取できる？',
+  '箱とカートンの違いは？',
+  '複数まとめて申し込める？',
+];
+
+let chatHistory = []; // { role: 'user'|'assistant', content: string }
+let chatOpen = false;
+let chatWelcomed = false;
+
+function openChat() {
+  chatOpen = true;
+  const panel = document.getElementById('chatPanel');
+  const toggle = document.getElementById('chatToggle');
+  if (panel) panel.hidden = false;
+  toggle?.querySelector('.chat-toggle__icon--open')?.setAttribute('hidden', '');
+  toggle?.querySelector('.chat-toggle__icon--close')?.removeAttribute('hidden');
+
+  if (!chatWelcomed) {
+    chatWelcomed = true;
+    appendChatMessage('assistant', 'こんにちは！にこにこ買取のAIアシスタントです😊\n申込方法・価格・商品の探し方など、お気軽にご質問ください。');
+    renderQuickReplies();
+  }
+
+  document.getElementById('chatMessages')?.scrollTo({ top: 9999, behavior: 'smooth' });
+  setTimeout(() => document.getElementById('chatInput')?.focus(), 100);
+}
+
+function closeChat() {
+  chatOpen = false;
+  const panel = document.getElementById('chatPanel');
+  const toggle = document.getElementById('chatToggle');
+  if (panel) panel.hidden = true;
+  toggle?.querySelector('.chat-toggle__icon--open')?.removeAttribute('hidden');
+  toggle?.querySelector('.chat-toggle__icon--close')?.setAttribute('hidden', '');
+}
+
+function appendChatMessage(role, text) {
+  const messages = document.getElementById('chatMessages');
+  if (!messages) return;
+
+  const bubble = document.createElement('div');
+  bubble.className = `chat-bubble chat-bubble--${role}`;
+
+  // 改行をそのまま表示
+  const p = document.createElement('div');
+  p.className = 'chat-bubble__text';
+  p.textContent = text;
+
+  bubble.appendChild(p);
+  messages.appendChild(bubble);
+  messages.scrollTop = messages.scrollHeight;
+}
+
+function appendTypingIndicator() {
+  const messages = document.getElementById('chatMessages');
+  if (!messages) return null;
+  const el = document.createElement('div');
+  el.className = 'chat-bubble chat-bubble--assistant chat-bubble--typing';
+  el.id = 'chatTyping';
+  el.innerHTML = '<span></span><span></span><span></span>';
+  messages.appendChild(el);
+  messages.scrollTop = messages.scrollHeight;
+  return el;
+}
+
+function renderQuickReplies() {
+  const el = document.getElementById('chatQuickReplies');
+  if (!el) return;
+  el.innerHTML = '';
+  for (const q of CHAT_QUICK_REPLIES) {
+    const btn = document.createElement('button');
+    btn.className = 'chat-quick-btn';
+    btn.type = 'button';
+    btn.textContent = q;
+    btn.addEventListener('click', () => {
+      el.innerHTML = '';
+      sendChatMessage(q);
+    });
+    el.appendChild(btn);
+  }
+}
+
+async function sendChatMessage(text) {
+  const trimmed = (text || '').trim();
+  if (!trimmed) return;
+
+  const input = document.getElementById('chatInput');
+  const sendBtn = document.getElementById('chatSend');
+  if (input) input.value = '';
+  if (sendBtn) sendBtn.disabled = true;
+
+  appendChatMessage('user', trimmed);
+  chatHistory.push({ role: 'user', content: trimmed });
+
+  const typing = appendTypingIndicator();
+
+  try {
+    const res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages: chatHistory }),
+    });
+    const data = await res.json();
+    typing?.remove();
+    const reply = data.message || data.error || 'うまく回答できませんでした。';
+    appendChatMessage('assistant', reply);
+    chatHistory.push({ role: 'assistant', content: reply });
+  } catch {
+    typing?.remove();
+    appendChatMessage('assistant', 'ネットワークエラーが発生しました。もう一度お試しください。');
+  } finally {
+    if (sendBtn) sendBtn.disabled = false;
+    if (input) { input.style.height = 'auto'; input.focus(); }
+  }
+}
+
+function wireChat() {
+  document.getElementById('chatToggle')?.addEventListener('click', () => {
+    chatOpen ? closeChat() : openChat();
+  });
+  document.getElementById('chatClose')?.addEventListener('click', closeChat);
+
+  const input = document.getElementById('chatInput');
+  const sendBtn = document.getElementById('chatSend');
+
+  sendBtn?.addEventListener('click', () => sendChatMessage(input?.value));
+
+  input?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendChatMessage(input.value);
+    }
+  });
+
+  // テキストエリアの高さ自動調整
+  input?.addEventListener('input', () => {
+    input.style.height = 'auto';
+    input.style.height = Math.min(input.scrollHeight, 100) + 'px';
+  });
+}
+
+wireChat();

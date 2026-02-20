@@ -261,6 +261,49 @@
   <!-- トースト通知 -->
   <div id="cartToast" class="cart-toast" aria-live="polite"></div>
 
+  <!-- AIチャットウィジェット -->
+  <div id="chatWidget" class="chat-widget">
+    <!-- 開閉ボタン -->
+    <button id="chatToggle" class="chat-toggle" type="button" aria-label="AIヘルプを開く">
+      <span class="chat-toggle__icon chat-toggle__icon--open">💬</span>
+      <span class="chat-toggle__icon chat-toggle__icon--close" hidden>✕</span>
+      <span class="chat-toggle__label">ヘルプ</span>
+    </button>
+
+    <!-- チャットパネル -->
+    <div id="chatPanel" class="chat-panel" hidden aria-label="AIヘルプチャット">
+      <div class="chat-panel__head">
+        <div class="chat-panel__headleft">
+          <div class="chat-panel__avatar">🤖</div>
+          <div>
+            <div class="chat-panel__title">にこにこBot</div>
+            <div class="chat-panel__subtitle">AI自動応答</div>
+          </div>
+        </div>
+        <button id="chatClose" class="chat-panel__close" type="button" aria-label="チャットを閉じる">✕</button>
+      </div>
+
+      <div id="chatMessages" class="chat-messages" role="log" aria-live="polite">
+        <!-- ウェルカムメッセージは JS で挿入 -->
+      </div>
+
+      <div id="chatQuickReplies" class="chat-quick-replies"></div>
+
+      <div class="chat-input-row">
+        <textarea
+          id="chatInput"
+          class="chat-input"
+          placeholder="質問を入力してください…"
+          rows="1"
+          maxlength="500"
+        ></textarea>
+        <button id="chatSend" class="chat-send" type="button" aria-label="送信">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
   <script src="app.js"></script>
 </body>
 </html>
