@@ -223,7 +223,7 @@
 
           <div id="checkoutError" class="checkout-error" hidden></div>
 
-          <button id="checkoutSubmit" class="checkout-submit" type="button">申し込む</button>
+          <button id="checkoutSubmit" class="checkout-submit" type="button">利用規約に同意して申し込む</button>
         </div>
 
         <div id="checkoutDone" class="checkout-done" hidden>
@@ -232,6 +232,28 @@
           <div class="checkout-done__text">ご利用いただきありがとうございました。<br>担当者よりご連絡いたします。</div>
           <button id="checkoutDoneClose" class="checkout-submit checkout-submit--outline" type="button">閉じる</button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 利用規約モーダル -->
+  <div id="termsModal" class="terms-modal" hidden>
+    <div class="terms-modal__bd" id="termsModalBd"></div>
+    <div class="terms-modal__panel" role="dialog" aria-modal="true" aria-label="利用規約">
+      <div class="terms-modal__head">
+        <div class="terms-modal__title">利用規約</div>
+        <button id="termsModalClose" class="terms-modal__close" type="button">閉じる</button>
+      </div>
+      <div class="terms-modal__body">
+        <iframe
+          src="https://docs.google.com/document/d/e/2PACX-1vS1h6sRK8xDU2h-gFr93PmFFH8B0i5pvL_K-xEIoXI2D1IkfEWbcRx1GE82BTIyJw/pub?embedded=true"
+          class="terms-modal__iframe"
+          title="利用規約"
+        ></iframe>
+      </div>
+      <div class="terms-modal__foot">
+        <button id="termsDeclineBtn" class="terms-modal__decline" type="button">キャンセル</button>
+        <button id="termsAgreeBtn" class="terms-modal__agree" type="button">同意して申し込む</button>
       </div>
     </div>
   </div>

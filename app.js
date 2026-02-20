@@ -876,6 +876,31 @@ function closeCheckoutModal() {
   setModalOpen(false);
 }
 
+function openTermsModal() {
+  // バリデーションを先に実行（エラーがあれば利用規約を開かない）
+  const errEl = document.getElementById('checkoutError');
+  const lastName = (document.getElementById('co_last_name')?.value || '').trim();
+  const firstName = (document.getElementById('co_first_name')?.value || '').trim();
+  const tel = (document.getElementById('co_tel')?.value || '').trim();
+  const errors = [];
+  if (!lastName) errors.push('氏名（姓）を入力してください');
+  if (!firstName) errors.push('氏名（名）を入力してください');
+  if (!tel) errors.push('電話番号を入力してください');
+  if (errors.length > 0) {
+    if (errEl) { errEl.textContent = errors.join('\n'); errEl.hidden = false; }
+    return;
+  }
+  if (errEl) errEl.hidden = true;
+
+  const el = document.getElementById('termsModal');
+  if (el) el.hidden = false;
+}
+
+function closeTermsModal() {
+  const el = document.getElementById('termsModal');
+  if (el) el.hidden = true;
+}
+
 function renderCheckoutPreview() {
   const el = document.getElementById('checkoutCartPreview');
   if (!el) return;
@@ -1016,7 +1041,14 @@ function wireCart() {
   // チェックアウトモーダル
   document.getElementById('checkoutModalBd')?.addEventListener('click', closeCheckoutModal);
   document.getElementById('checkoutModalClose')?.addEventListener('click', closeCheckoutModal);
-  document.getElementById('checkoutSubmit')?.addEventListener('click', submitCheckout);
+  document.getElementById('checkoutSubmit')?.addEventListener('click', openTermsModal);
+  document.getElementById('termsModalBd')?.addEventListener('click', closeTermsModal);
+  document.getElementById('termsModalClose')?.addEventListener('click', closeTermsModal);
+  document.getElementById('termsDeclineBtn')?.addEventListener('click', closeTermsModal);
+  document.getElementById('termsAgreeBtn')?.addEventListener('click', () => {
+    closeTermsModal();
+    submitCheckout();
+  });
   document.getElementById('checkoutDoneClose')?.addEventListener('click', closeCheckoutModal);
 
   // バッジ初期化
