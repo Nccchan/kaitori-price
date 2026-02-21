@@ -14,3 +14,4 @@ pnpm-debug.log*
 training_data/*.csv
 training_data/*.txt
 training_data/*.zip
+training_data/*.json
