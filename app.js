@@ -1010,20 +1010,26 @@ async function submitCheckout() {
   const errEl = document.getElementById('checkoutError');
   const submitBtn = document.getElementById('checkoutSubmit');
 
-  const lastName = (document.getElementById('co_last_name')?.value || '').trim();
-  const firstName = (document.getElementById('co_first_name')?.value || '').trim();
-  const tel = (document.getElementById('co_tel')?.value || '').trim();
+  const isTestMode = new URLSearchParams(location.search).get('testMode') === '1';
+
+  // テストモード：未入力項目をダミーデータで補完してからバリデーションへ
+  if (isTestMode) {
+    const elLast = document.getElementById('co_last_name');
+    const elFirst = document.getElementById('co_first_name');
+    const elTel = document.getElementById('co_tel');
+    if (elLast && !elLast.value.trim()) elLast.value = 'テスト';
+    if (elFirst && !elFirst.value.trim()) elFirst.value = '太郎';
+    if (elTel && !elTel.value.trim()) elTel.value = '09000000000';
+  }
+
+  let lastName = (document.getElementById('co_last_name')?.value || '').trim();
+  let firstName = (document.getElementById('co_first_name')?.value || '').trim();
+  let tel = (document.getElementById('co_tel')?.value || '').trim();
   const email = (document.getElementById('co_email')?.value || '').trim();
   const extraComment = (document.getElementById('co_comment')?.value || '').trim();
 
-  const isTestMode = new URLSearchParams(location.search).get('testMode') === '1';
-
-  // バリデーション（テストモードはスキップしてダミーデータで補完）
-  if (isTestMode) {
-    if (!lastName) { const el = document.getElementById('co_last_name'); if (el) el.value = 'テスト'; }
-    if (!firstName) { const el = document.getElementById('co_first_name'); if (el) el.value = '太郎'; }
-    if (!tel) { const el = document.getElementById('co_tel'); if (el) el.value = '09000000000'; }
-  } else {
+  // バリデーション（テストモードはスキップ）
+  if (!isTestMode) {
     const errors = [];
     if (!lastName) errors.push('氏名（姓）を入力してください');
     if (!firstName) errors.push('氏名（名）を入力してください');
