@@ -9,20 +9,29 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="images/icon_130x130.png">
 </head>
 <body>
   <header class="header">
     <div class="container header__inner">
       <div class="brand">
-        <div class="brand__mark">😊</div>
+        <div class="brand__mark">
+          <img src="images/icon_130x130.png" alt="にこにこ買取" class="brand__mark-img">
+        </div>
         <div style="min-width:0">
-          <div class="brand__title">にこにこ買取</div>
-          <div class="brand__subtitle">トレカ買取価格表</div>
+          <img src="images/logo_horizontal.png" alt="にこにこ買取" class="brand__logo">
         </div>
       </div>
-      <div class="header__meta">
-        <div class="header__updated">更新日: <span id="updatedAt">—</span></div>
-        <div class="header__note">買取価格は翌日到着分のみ有効です</div>
+      <div class="header__right">
+        <div class="header__meta">
+          <div class="header__updated">更新日: <span id="updatedAt">—</span></div>
+          <div class="header__note">買取価格は翌日到着分のみ有効です</div>
+          <div class="header__note">すべてパックの画像を使用していますが、ブースターボックスの価格です</div>
+        </div>
+        <button id="cartHeaderBtn" class="cart-header-btn" type="button" aria-label="カート (0点)">
+          🛒
+          <span id="cartBadge" class="cart-badge" hidden>0</span>
+        </button>
       </div>
     </div>
   </header>
@@ -72,8 +81,9 @@
               <th class="th-img">画像</th>
               <th>商品名</th>
               <th>型式</th>
-              <th class="th-price">シュリンクあり</th>
-              <th class="th-price">シュリンクなし</th>
+              <th class="th-price" id="th-shrink">シュリンクあり</th>
+              <th class="th-price" id="th-noshrink">シュリンクなし</th>
+              <th class="th-action">申込</th>
             </tr>
           </thead>
           <tbody id="tbody"></tbody>
@@ -85,9 +95,9 @@
   <footer class="footer">
     <div class="container footer__inner">
       <div>
-        <div class="footer__brand">😊 にこにこ買取</div>
+        <div class="footer__brand"><img src="images/logo_horizontal.png" alt="にこにこ買取" class="footer__logo"></div>
         <div class="footer__small">※ 買取価格は毎日更新されます。最新の価格はこのページをご確認ください。</div>
-        <div class="footer__small">※ シュリンクなし価格が空欄の商品は、シュリンクなしでのお取り扱いがございません。</div>
+        <div id="footerNote" class="footer__small">※ シュリンクなし価格が空欄の商品は、シュリンクなしでのお取り扱いがございません。</div>
       </div>
       <a class="xlink" href="https://x.com/niko_kaitori" target="_blank" rel="noopener noreferrer">X: @niko_kaitori</a>
     </div>
@@ -105,7 +115,7 @@
       <div id="shareCard" class="share__card">
         <div class="share__topline">
           <div class="share__brand">
-            <div class="share__mark">😊</div>
+            <div class="share__mark"><img src="images/icon_130x130.png" alt="" class="share__mark-img"></div>
             <div>
               <div class="share__brandname">にこにこ買取</div>
               <div class="share__meta"><span id="shareCategory"></span> / 更新日: <span id="shareUpdatedAt"></span></div>
@@ -123,11 +133,11 @@
 
             <div class="share__prices">
               <div class="shareprice">
-                <div class="shareprice__label">シュリンクあり</div>
+                <div id="shareShrinkLabel" class="shareprice__label">シュリンクあり</div>
                 <div id="shareShrink" class="shareprice__value"></div>
               </div>
               <div class="shareprice">
-                <div class="shareprice__label">シュリンクなし</div>
+                <div id="shareNoShrinkLabel" class="shareprice__label">シュリンクなし</div>
                 <div id="shareNoShrink" class="shareprice__value"></div>
               </div>
             </div>
@@ -137,6 +147,159 @@
         <div class="share__foot">
           <div class="share__note">※ 買取価格は翌日到着分のみ有効です</div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- シュリンク種別選択 -->
+  <div id="shrinkSelector" class="shrink-sel" hidden>
+    <div class="shrink-sel__bd" id="shrinkSelectorBd"></div>
+    <div class="shrink-sel__panel" role="dialog" aria-modal="true" aria-label="シュリンク種別選択">
+      <div class="shrink-sel__title">どちらで申し込みますか？</div>
+      <button id="shrinkShrinkBtn" class="shrink-sel__btn" type="button">
+        <span id="shrinkShrinkLabel" class="shrink-sel__item">シュリンクあり</span>
+        <span id="shrinkShrinkPrice" class="shrink-sel__price"></span>
+      </button>
+      <button id="shrinkNoshrinkBtn" class="shrink-sel__btn" type="button">
+        <span id="shrinkNoshrinkLabel" class="shrink-sel__item">シュリンクなし</span>
+        <span id="shrinkNoshrinkPrice" class="shrink-sel__price"></span>
+      </button>
+      <button id="shrinkSelectorCancel" class="shrink-sel__cancel" type="button">キャンセル</button>
+    </div>
+  </div>
+
+  <!-- カートモーダル -->
+  <div id="cartModal" class="cart-modal" hidden>
+    <div class="cart-modal__bd" id="cartModalBd"></div>
+    <div class="cart-modal__panel" role="dialog" aria-modal="true" aria-label="申込カート">
+      <div class="cart-modal__head">
+        <div class="cart-modal__title">申込カート</div>
+        <button id="cartModalClose" class="cart-modal__close" type="button">閉じる</button>
+      </div>
+      <div id="cartModalBody" class="cart-modal__body"></div>
+      <div id="cartModalFoot" class="cart-modal__foot"></div>
+    </div>
+  </div>
+
+  <!-- チェックアウトモーダル -->
+  <div id="checkoutModal" class="checkout-modal" hidden>
+    <div class="checkout-modal__bd" id="checkoutModalBd"></div>
+    <div class="checkout-modal__panel" role="dialog" aria-modal="true" aria-label="買取申込フォーム">
+      <div class="checkout-modal__head">
+        <div class="checkout-modal__title">買取申込フォーム</div>
+        <button id="checkoutModalClose" class="checkout-modal__close" type="button">閉じる</button>
+      </div>
+      <div class="checkout-modal__body">
+        <div id="checkoutForm">
+          <p class="checkout-modal__note">お名前と電話番号をご入力の上、申し込みボタンを押してください。</p>
+
+          <div id="checkoutCartPreview"></div>
+
+          <div class="form-row">
+            <div class="form-field">
+              <label class="form-label" for="co_last_name">氏名（姓）<span class="form-required">必須</span></label>
+              <input id="co_last_name" class="form-input" type="text" placeholder="田中" autocomplete="family-name">
+            </div>
+            <div class="form-field">
+              <label class="form-label" for="co_first_name">氏名（名）<span class="form-required">必須</span></label>
+              <input id="co_first_name" class="form-input" type="text" placeholder="太郎" autocomplete="given-name">
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label class="form-label" for="co_tel">電話番号<span class="form-required">必須</span></label>
+            <input id="co_tel" class="form-input" type="tel" placeholder="090-1234-5678" autocomplete="tel">
+          </div>
+
+          <div class="form-field">
+            <label class="form-label" for="co_email">メールアドレス</label>
+            <input id="co_email" class="form-input" type="email" placeholder="example@domain.com" autocomplete="email">
+          </div>
+
+          <div class="form-field">
+            <label class="form-label" for="co_comment">備考（任意）</label>
+            <textarea id="co_comment" class="form-input form-textarea" placeholder="何かあればご記入ください"></textarea>
+          </div>
+
+          <div id="checkoutError" class="checkout-error" hidden></div>
+
+          <button id="checkoutSubmit" class="checkout-submit" type="button">利用規約に同意して申し込む</button>
+        </div>
+
+        <div id="checkoutDone" class="checkout-done" hidden>
+          <div class="checkout-done__icon">✅</div>
+          <div class="checkout-done__title">お申し込みが完了しました</div>
+          <div class="checkout-done__text">ご利用いただきありがとうございました。<br>担当者よりご連絡いたします。</div>
+          <button id="checkoutDoneClose" class="checkout-submit checkout-submit--outline" type="button">閉じる</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 利用規約モーダル -->
+  <div id="termsModal" class="terms-modal" hidden>
+    <div class="terms-modal__bd" id="termsModalBd"></div>
+    <div class="terms-modal__panel" role="dialog" aria-modal="true" aria-label="利用規約">
+      <div class="terms-modal__head">
+        <div class="terms-modal__title">利用規約</div>
+        <button id="termsModalClose" class="terms-modal__close" type="button">閉じる</button>
+      </div>
+      <div class="terms-modal__body">
+        <iframe
+          src="https://docs.google.com/document/d/e/2PACX-1vS1h6sRK8xDU2h-gFr93PmFFH8B0i5pvL_K-xEIoXI2D1IkfEWbcRx1GE82BTIyJw/pub?embedded=true"
+          class="terms-modal__iframe"
+          title="利用規約"
+        ></iframe>
+      </div>
+      <div class="terms-modal__foot">
+        <button id="termsDeclineBtn" class="terms-modal__decline" type="button">キャンセル</button>
+        <button id="termsAgreeBtn" class="terms-modal__agree" type="button">同意して申し込む</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- トースト通知 -->
+  <div id="cartToast" class="cart-toast" aria-live="polite"></div>
+
+  <!-- AIチャットウィジェット -->
+  <div id="chatWidget" class="chat-widget">
+    <!-- 開閉ボタン -->
+    <button id="chatToggle" class="chat-toggle" type="button" aria-label="AIヘルプを開く">
+      <span class="chat-toggle__icon chat-toggle__icon--open">💬</span>
+      <span class="chat-toggle__icon chat-toggle__icon--close" hidden>✕</span>
+      <span class="chat-toggle__label">ヘルプ</span>
+    </button>
+
+    <!-- チャットパネル -->
+    <div id="chatPanel" class="chat-panel" hidden aria-label="AIヘルプチャット">
+      <div class="chat-panel__head">
+        <div class="chat-panel__headleft">
+          <div class="chat-panel__avatar">🤖</div>
+          <div>
+            <div class="chat-panel__title">にこにこBot</div>
+            <div class="chat-panel__subtitle">AI自動応答</div>
+          </div>
+        </div>
+        <button id="chatClose" class="chat-panel__close" type="button" aria-label="チャットを閉じる">✕</button>
+      </div>
+
+      <div id="chatMessages" class="chat-messages" role="log" aria-live="polite">
+        <!-- ウェルカムメッセージは JS で挿入 -->
+      </div>
+
+      <div id="chatQuickReplies" class="chat-quick-replies"></div>
+
+      <div class="chat-input-row">
+        <textarea
+          id="chatInput"
+          class="chat-input"
+          placeholder="質問を入力してください…"
+          rows="1"
+          maxlength="500"
+        ></textarea>
+        <button id="chatSend" class="chat-send" type="button" aria-label="送信">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg>
+        </button>
       </div>
     </div>
   </div>

@@ -3,10 +3,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "node scripts/admin_server.mjs",
+    "dev": "node --env-file=.env scripts/admin_server.mjs",
     "manifest": "node scripts/build_manifest.mjs"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.78.0",
     "express": "^5.2.1",
     "multer": "^2.0.2",
     "sharp": "^0.34.5"
