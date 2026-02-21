@@ -354,6 +354,9 @@ html.is-modal-open,body.is-modal-open{overflow:hidden}
 .howto__step-body{min-width:0}
 .howto__step-title{font-weight:900;font-size:15px;margin-bottom:6px}
 .howto__step-text{font-size:13px;color:var(--muted);line-height:1.75}
+.howto__step--highlight{border-color:rgba(124,58,237,0.45);background:linear-gradient(135deg,rgba(124,58,237,0.07),rgba(59,130,246,0.05));box-shadow:0 2px 12px rgba(124,58,237,0.14)}
+.howto__step--highlight .howto__step-num{background:linear-gradient(135deg,#7c3aed,#2563eb);box-shadow:0 4px 16px rgba(124,58,237,0.40)}
+.howto__step--highlight .howto__step-title::before{content:"★ ";color:rgba(124,58,237,0.8)}
 
 .howto__address{margin-top:10px;border:1px solid rgba(124,58,237,0.22);border-radius:12px;background:linear-gradient(135deg,rgba(124,58,237,0.06),rgba(34,197,94,0.04));padding:10px 12px;font-size:13px;line-height:1.75}
 .howto__address-label{font-weight:900;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px}
