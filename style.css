@@ -231,6 +231,7 @@ a{color:inherit}
 .checkout-done__icon{font-size:48px;margin-bottom:12px}
 .checkout-done__title{font-weight:900;font-size:20px;margin-bottom:8px}
 .checkout-done__text{color:var(--muted);font-size:14px;line-height:1.6;margin-bottom:16px}
+.checkout-done__email-notice{background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:12px 16px;font-size:13px;color:#1e40af;line-height:1.6;margin-bottom:16px}
 .checkout-done__actions{display:flex;flex-direction:column;gap:10px;margin-top:20px}
 
 /* 見積書 */
