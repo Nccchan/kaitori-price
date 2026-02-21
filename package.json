@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "node scripts/admin_server.mjs",
+    "dev": "node --env-file=.env scripts/admin_server.mjs",
     "manifest": "node scripts/build_manifest.mjs"
   },
   "dependencies": {
