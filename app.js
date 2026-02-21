@@ -882,9 +882,39 @@ async function initLineSDK() {
   }
 }
 
+function validateAndRefreshCartPrices() {
+  const params = new URLSearchParams(location.search);
+  const isTestPriceChange = params.get('testMode') === '1' && params.get('testPriceChange') === '1';
+
+  // testPriceChange=1 のとき：カート内価格を意図的にズラしてバグ再現をシミュレート
+  if (isTestPriceChange && cart.length > 0) {
+    for (const item of cart) {
+      item.price = item.price + 100;
+    }
+    saveCart();
+  }
+
+  const changed = [];
+  for (const item of cart) {
+    const currentItem = allData[item.category]?.items?.find(d => d.model === item.model);
+    if (!currentItem) continue;
+    const rawPrice = item.shrinkType === 'shrink' ? currentItem.shrink : currentItem.noshrink;
+    const currentPrice = parseInt(String(rawPrice || '0').replace(/[^0-9]/g, ''), 10) || 0;
+    if (currentPrice > 0 && currentPrice !== item.price) {
+      changed.push({ name: item.name, model: item.model, oldPrice: item.price, newPrice: currentPrice });
+      item.price = currentPrice;
+    }
+  }
+  if (changed.length > 0) saveCart();
+  return changed;
+}
+
 function openCheckoutModal() {
   const el = document.getElementById('checkoutModal');
   if (!el) return;
+
+  // 価格の再検証
+  const changed = validateAndRefreshCartPrices();
 
   // フォームをリセット
   const form = document.getElementById('checkoutForm');
@@ -893,8 +923,20 @@ function openCheckoutModal() {
   const submitBtn = document.getElementById('checkoutSubmit');
   if (form) form.hidden = false;
   if (done) done.hidden = true;
-  if (errEl) errEl.hidden = true;
   if (submitBtn) submitBtn.disabled = false;
+
+  // 価格変動があれば警告を表示
+  if (errEl) {
+    if (changed.length > 0) {
+      const lines = changed.map(c =>
+        `・${c.name}（${c.model}）: ¥${c.oldPrice.toLocaleString()} → ¥${c.newPrice.toLocaleString()}`
+      );
+      errEl.textContent = `⚠️ 以下の商品の買取価格が更新されました。最新価格に自動修正しました。\n${lines.join('\n')}`;
+      errEl.hidden = false;
+    } else {
+      errEl.hidden = true;
+    }
+  }
 
   renderCheckoutPreview();
 
@@ -968,26 +1010,40 @@ async function submitCheckout() {
   const errEl = document.getElementById('checkoutError');
   const submitBtn = document.getElementById('checkoutSubmit');
 
-  const lastName = (document.getElementById('co_last_name')?.value || '').trim();
-  const firstName = (document.getElementById('co_first_name')?.value || '').trim();
-  const tel = (document.getElementById('co_tel')?.value || '').trim();
+  const isTestMode = new URLSearchParams(location.search).get('testMode') === '1';
+
+  // テストモード：未入力項目をダミーデータで補完してからバリデーションへ
+  if (isTestMode) {
+    const elLast = document.getElementById('co_last_name');
+    const elFirst = document.getElementById('co_first_name');
+    const elTel = document.getElementById('co_tel');
+    if (elLast && !elLast.value.trim()) elLast.value = 'テスト';
+    if (elFirst && !elFirst.value.trim()) elFirst.value = '太郎';
+    if (elTel && !elTel.value.trim()) elTel.value = '09000000000';
+  }
+
+  let lastName = (document.getElementById('co_last_name')?.value || '').trim();
+  let firstName = (document.getElementById('co_first_name')?.value || '').trim();
+  let tel = (document.getElementById('co_tel')?.value || '').trim();
   const email = (document.getElementById('co_email')?.value || '').trim();
   const extraComment = (document.getElementById('co_comment')?.value || '').trim();
 
-  // バリデーション
-  const errors = [];
-  if (!lastName) errors.push('氏名（姓）を入力してください');
-  if (!firstName) errors.push('氏名（名）を入力してください');
-  if (!tel) {
-    errors.push('電話番号を入力してください');
-  } else if (!/(?:^0[0-9]{9,10}$)|(?:^0[0-9]{1,3}-[0-9]{2,4}-[0-9]{3,4}$)/.test(tel)) {
-    errors.push('電話番号の形式が正しくありません');
-  }
+  // バリデーション（テストモードはスキップ）
+  if (!isTestMode) {
+    const errors = [];
+    if (!lastName) errors.push('氏名（姓）を入力してください');
+    if (!firstName) errors.push('氏名（名）を入力してください');
+    if (!tel) {
+      errors.push('電話番号を入力してください');
+    } else if (!/(?:^0[0-9]{9,10}$)|(?:^0[0-9]{1,3}-[0-9]{2,4}-[0-9]{3,4}$)/.test(tel)) {
+      errors.push('電話番号の形式が正しくありません');
+    }
 
-  if (errors.length > 0) {
-    if (errEl) { errEl.textContent = errors.join('\n'); errEl.hidden = false; }
-    document.getElementById('checkoutModal')?.querySelector('.checkout-modal__body')?.scrollTo({ top: 0, behavior: 'smooth' });
-    return;
+    if (errors.length > 0) {
+      if (errEl) { errEl.textContent = errors.join('\n'); errEl.hidden = false; }
+      document.getElementById('checkoutModal')?.querySelector('.checkout-modal__body')?.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
   }
 
   if (errEl) errEl.hidden = true;
@@ -1013,6 +1069,18 @@ async function submitCheckout() {
   if (email) payload.email = email;
   if (_memberJwt) payload.member_jwt = _memberJwt;
 
+  // テストモード（?testMode=1）：APIをスキップして完了画面を表示
+  if (isTestMode) {
+    const snapshot = cart.map(c => ({ ...c }));
+    clearCart();
+    renderReceipt(snapshot, { reception_id: 'TEST01' });
+    const form = document.getElementById('checkoutForm');
+    const done = document.getElementById('checkoutDone');
+    if (form) form.hidden = true;
+    if (done) done.hidden = false;
+    return;
+  }
+
   // Recore API 送信
   try {
     const res = await fetch('https://co-api.recore-pos.com/bad/offer', {
@@ -1027,7 +1095,9 @@ async function submitCheckout() {
     const data = await res.json().catch(() => null);
 
     if (res.ok) {
+      const snapshot = cart.map(c => ({ ...c }));
       clearCart();
+      renderReceipt(snapshot, data);
       const form = document.getElementById('checkoutForm');
       const done = document.getElementById('checkoutDone');
       if (form) form.hidden = true;
@@ -1043,6 +1113,44 @@ async function submitCheckout() {
       errEl.hidden = false;
     }
     if (submitBtn) submitBtn.disabled = false;
+  }
+}
+
+function renderReceipt(snapshot, apiData) {
+  // 受付ID（Recore接続後はapiDataから取得、それまでは非表示）
+  const receptionId = apiData?.reception_id || apiData?.offer_id || apiData?.id || null;
+  document.querySelectorAll('#receiptId, .receipt__id-inline').forEach(el => {
+    el.textContent = receptionId || '（LINEにてお送りします）';
+  });
+
+  // 商品行
+  const tbody = document.getElementById('receiptTbody');
+  if (tbody) {
+    tbody.innerHTML = '';
+    for (const item of snapshot) {
+      const sub = item.price * item.quantity;
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${item.name}${item.model ? `<span class="receipt__model">（${item.model}）</span>` : ''}<br><small>${item.shrinkLabel}</small></td>
+        <td class="receipt__td-num">${item.quantity}箱</td>
+        <td class="receipt__td-num">¥${item.price.toLocaleString()}</td>
+        <td class="receipt__td-num">¥${sub.toLocaleString()}</td>
+      `;
+      tbody.appendChild(tr);
+    }
+  }
+
+  // 合計
+  const totalBoxes = snapshot.reduce((s, c) => s + c.quantity, 0);
+  const totalAmount = snapshot.reduce((s, c) => s + c.price * c.quantity, 0);
+  const totalsEl = document.getElementById('receiptTotals');
+  if (totalsEl) {
+    totalsEl.innerHTML = `
+      <div class="receipt__total-row">合計箱数：<strong>${totalBoxes}箱</strong></div>
+      <div class="receipt__total-row">合計金額：<strong>¥${totalAmount.toLocaleString()}</strong></div>
+      <div class="receipt__total-row">減額合計：<strong>¥0</strong></div>
+      <div class="receipt__total-row receipt__total-row--final">最終買取金額：<strong>¥${totalAmount.toLocaleString()}</strong></div>
+    `;
   }
 }
 
@@ -1241,3 +1349,9 @@ function wireChat() {
 }
 
 wireChat();
+
+// テストモードバナー
+if (new URLSearchParams(location.search).get('testMode') === '1') {
+  const banner = document.getElementById('testModeBanner');
+  if (banner) banner.hidden = false;
+}
