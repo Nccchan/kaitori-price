@@ -10,3 +10,6 @@ pnpm-debug.log*
 
 .env
 
+# LINE学習データ（個人情報含む可能性があるためgit管理外）
+training_data/*.csv
+training_data/*.txt
