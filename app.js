@@ -1006,6 +1006,17 @@ function renderCheckoutPreview() {
   el.appendChild(wrap);
 }
 
+async function sendReceiptEmail(email, name, receptionId, items) {
+  if (!email) return;
+  try {
+    await fetch('/api/send-receipt', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ to: email, name, receptionId, items }),
+    });
+  } catch { /* メール送信失敗は無視（申込自体は成功済み） */ }
+}
+
 async function submitCheckout() {
   const errEl = document.getElementById('checkoutError');
   const submitBtn = document.getElementById('checkoutSubmit');
@@ -1074,6 +1085,7 @@ async function submitCheckout() {
     const snapshot = cart.map(c => ({ ...c }));
     clearCart();
     renderReceipt(snapshot, { reception_id: 'TEST01' });
+    sendReceiptEmail(email, `${lastName} ${firstName}`, 'TEST01', snapshot);
     const form = document.getElementById('checkoutForm');
     const done = document.getElementById('checkoutDone');
     if (form) form.hidden = true;
@@ -1098,6 +1110,8 @@ async function submitCheckout() {
       const snapshot = cart.map(c => ({ ...c }));
       clearCart();
       renderReceipt(snapshot, data);
+      const receptionId = data?.reception_id || data?.offer_id || data?.id || '';
+      sendReceiptEmail(email, `${lastName} ${firstName}`, receptionId, snapshot);
       const form = document.getElementById('checkoutForm');
       const done = document.getElementById('checkoutDone');
       if (form) form.hidden = true;
