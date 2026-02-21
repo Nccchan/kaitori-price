@@ -883,6 +883,17 @@ async function initLineSDK() {
 }
 
 function validateAndRefreshCartPrices() {
+  const params = new URLSearchParams(location.search);
+  const isTestPriceChange = params.get('testMode') === '1' && params.get('testPriceChange') === '1';
+
+  // testPriceChange=1 のとき：カート内価格を意図的にズラしてバグ再現をシミュレート
+  if (isTestPriceChange && cart.length > 0) {
+    for (const item of cart) {
+      item.price = item.price + 100;
+    }
+    saveCart();
+  }
+
   const changed = [];
   for (const item of cart) {
     const currentItem = allData[item.category]?.items?.find(d => d.model === item.model);
