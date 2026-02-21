@@ -1027,7 +1027,9 @@ async function submitCheckout() {
     const data = await res.json().catch(() => null);
 
     if (res.ok) {
+      const snapshot = cart.map(c => ({ ...c }));
       clearCart();
+      renderReceipt(snapshot, data);
       const form = document.getElementById('checkoutForm');
       const done = document.getElementById('checkoutDone');
       if (form) form.hidden = true;
@@ -1043,6 +1045,44 @@ async function submitCheckout() {
       errEl.hidden = false;
     }
     if (submitBtn) submitBtn.disabled = false;
+  }
+}
+
+function renderReceipt(snapshot, apiData) {
+  // 受付ID（Recore接続後はapiDataから取得、それまでは非表示）
+  const receptionId = apiData?.reception_id || apiData?.offer_id || apiData?.id || null;
+  document.querySelectorAll('#receiptId, .receipt__id-inline').forEach(el => {
+    el.textContent = receptionId || '（LINEにてお送りします）';
+  });
+
+  // 商品行
+  const tbody = document.getElementById('receiptTbody');
+  if (tbody) {
+    tbody.innerHTML = '';
+    for (const item of snapshot) {
+      const sub = item.price * item.quantity;
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${item.name}${item.model ? `<span class="receipt__model">（${item.model}）</span>` : ''}<br><small>${item.shrinkLabel}</small></td>
+        <td class="receipt__td-num">${item.quantity}箱</td>
+        <td class="receipt__td-num">¥${item.price.toLocaleString()}</td>
+        <td class="receipt__td-num">¥${sub.toLocaleString()}</td>
+      `;
+      tbody.appendChild(tr);
+    }
+  }
+
+  // 合計
+  const totalBoxes = snapshot.reduce((s, c) => s + c.quantity, 0);
+  const totalAmount = snapshot.reduce((s, c) => s + c.price * c.quantity, 0);
+  const totalsEl = document.getElementById('receiptTotals');
+  if (totalsEl) {
+    totalsEl.innerHTML = `
+      <div class="receipt__total-row">合計箱数：<strong>${totalBoxes}箱</strong></div>
+      <div class="receipt__total-row">合計金額：<strong>¥${totalAmount.toLocaleString()}</strong></div>
+      <div class="receipt__total-row">減額合計：<strong>¥0</strong></div>
+      <div class="receipt__total-row receipt__total-row--final">最終買取金額：<strong>¥${totalAmount.toLocaleString()}</strong></div>
+    `;
   }
 }
 

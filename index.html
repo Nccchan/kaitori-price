@@ -368,8 +368,48 @@
         <div id="checkoutDone" class="checkout-done" hidden>
           <div class="checkout-done__icon">✅</div>
           <div class="checkout-done__title">お申し込みが完了しました</div>
-          <div class="checkout-done__text">ご利用いただきありがとうございました。<br>担当者よりご連絡いたします。</div>
-          <button id="checkoutDoneClose" class="checkout-submit checkout-submit--outline" type="button">閉じる</button>
+          <div class="checkout-done__text">ご利用いただきありがとうございました。</div>
+
+          <!-- 見積書 -->
+          <div class="receipt" id="receiptBlock">
+            <div class="receipt__header">
+              <div class="receipt__label">毎々、お世話になっております。御見積書を送付いたします。</div>
+              <div class="receipt__id-row">
+                受付ID：<span id="receiptId" class="receipt__id">—</span>
+              </div>
+            </div>
+
+            <div class="receipt__section-title">★ 買取見積書</div>
+            <table class="receipt__table" id="receiptTable">
+              <thead>
+                <tr>
+                  <th>商品名</th>
+                  <th class="receipt__th-num">数量</th>
+                  <th class="receipt__th-num">単価</th>
+                  <th class="receipt__th-num">小計</th>
+                </tr>
+              </thead>
+              <tbody id="receiptTbody"></tbody>
+            </table>
+
+            <div class="receipt__totals" id="receiptTotals"></div>
+
+            <div class="receipt__notes">
+              <div class="receipt__notes-title">【注意事項】</div>
+              <ul class="receipt__notes-list">
+                <li>段ボールの外側に<strong>受付ID（<span class="receipt__id-inline">—</span>）を大きく記載</strong>してください。</li>
+                <li>この見積もりを<strong>印刷して商品に同梱</strong>してください。</li>
+                <li>1枚の印刷が難しい場合は、スクリーンショットの分割でも可能です。</li>
+                <li>同梱がない場合、査定が遅れることがあります。</li>
+                <li>メニューから申請と発送を行い、発送後は必ず<strong>追跡番号をLINEでご連絡</strong>ください。</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="checkout-done__actions">
+            <button id="receiptPrintBtn" class="checkout-submit" type="button" onclick="window.print()">🖨️ 印刷する</button>
+            <button id="checkoutDoneClose" class="checkout-submit checkout-submit--outline" type="button">閉じる</button>
+          </div>
         </div>
       </div>
     </div>

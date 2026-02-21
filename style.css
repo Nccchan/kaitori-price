@@ -227,7 +227,35 @@ a{color:inherit}
 .checkout-done{text-align:center;padding:24px 0 8px}
 .checkout-done__icon{font-size:48px;margin-bottom:12px}
 .checkout-done__title{font-weight:900;font-size:20px;margin-bottom:8px}
-.checkout-done__text{color:var(--muted);font-size:14px;line-height:1.6}
+.checkout-done__text{color:var(--muted);font-size:14px;line-height:1.6;margin-bottom:16px}
+.checkout-done__actions{display:flex;flex-direction:column;gap:10px;margin-top:20px}
+
+/* 見積書 */
+.receipt{border:2px solid rgba(124,58,237,0.35);border-radius:16px;background:#fff;padding:20px;margin:18px 0;text-align:left;font-size:13px}
+.receipt__header{margin-bottom:14px}
+.receipt__label{color:var(--muted);font-size:12px;margin-bottom:6px}
+.receipt__id-row{font-size:14px;font-weight:900}
+.receipt__id{color:rgba(124,58,237,0.9);font-size:18px;letter-spacing:.08em}
+.receipt__section-title{font-weight:900;font-size:14px;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--line)}
+.receipt__table{width:100%;border-collapse:collapse;margin-bottom:14px}
+.receipt__table th{font-size:11px;font-weight:900;color:var(--muted);padding:4px 6px;border-bottom:1px solid var(--line);white-space:nowrap}
+.receipt__th-num,.receipt__td-num{text-align:right;white-space:nowrap}
+.receipt__table td{padding:6px 6px;border-bottom:1px solid rgba(0,0,0,0.05);vertical-align:top;line-height:1.5}
+.receipt__model{font-size:11px;color:var(--muted)}
+.receipt__totals{border-top:2px solid var(--line);padding-top:10px;margin-bottom:14px;display:grid;gap:4px}
+.receipt__total-row{display:flex;justify-content:space-between;font-size:13px;color:var(--muted)}
+.receipt__total-row--final{font-size:15px;font-weight:900;color:var(--text);border-top:1px solid var(--line);padding-top:6px;margin-top:4px}
+.receipt__notes{background:rgba(239,68,68,0.05);border:1px solid rgba(239,68,68,0.2);border-radius:10px;padding:12px}
+.receipt__notes-title{font-weight:900;font-size:13px;margin-bottom:6px}
+.receipt__notes-list{margin:0;padding:0 0 0 16px;display:grid;gap:5px}
+.receipt__notes-list li{font-size:12px;color:var(--muted);line-height:1.65}
+
+/* 印刷時 */
+@media print{
+  body *{visibility:hidden}
+  #receiptBlock,#receiptBlock *{visibility:visible}
+  #receiptBlock{position:fixed;top:0;left:0;width:100%;padding:20px;border:none}
+}
 
 /* share (post screenshot) */
 html.is-modal-open,body.is-modal-open{overflow:hidden}
