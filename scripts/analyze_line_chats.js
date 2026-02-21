@@ -2,10 +2,12 @@
 /**
  * LINE公式アカウント チャット履歴CSVを解析してQ&Aパターンを抽出するスクリプト
  * 使い方: node scripts/analyze_line_chats.js
+ * ZIPファイルも自動で解凍して処理します
  */
 
 const fs = require('fs');
 const path = require('path');
+const { execSync } = require('child_process');
 
 const TRAINING_DIR = path.join(__dirname, '..', 'training_data');
 const OUTPUT_FILE = path.join(TRAINING_DIR, 'qa_summary.json');
@@ -145,12 +147,32 @@ function categorize(question) {
   return 'その他';
 }
 
+// ZIPファイルを解凍する
+function extractZips() {
+  const zipFiles = fs.readdirSync(TRAINING_DIR).filter(f => f.endsWith('.zip'));
+  if (zipFiles.length === 0) return;
+
+  console.log(`${zipFiles.length}個のZIPファイルを解凍中...`);
+  zipFiles.forEach(zip => {
+    const zipPath = path.join(TRAINING_DIR, zip);
+    try {
+      execSync(`unzip -o "${zipPath}" -d "${TRAINING_DIR}"`, { stdio: 'pipe' });
+      console.log(`  解凍完了: ${zip}`);
+    } catch (e) {
+      console.error(`  解凍失敗: ${zip} - ${e.message}`);
+    }
+  });
+}
+
 // メイン処理
 function main() {
   if (!fs.existsSync(TRAINING_DIR)) {
     console.error(`training_data/ ディレクトリが見つかりません: ${TRAINING_DIR}`);
     process.exit(1);
   }
+
+  // ZIPがあれば先に解凍
+  extractZips();
 
   const files = fs.readdirSync(TRAINING_DIR).filter(f => f.endsWith('.csv'));
 

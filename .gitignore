@@ -13,3 +13,4 @@ pnpm-debug.log*
 # LINE学習データ（個人情報含む可能性があるためgit管理外）
 training_data/*.csv
 training_data/*.txt
+training_data/*.zip
