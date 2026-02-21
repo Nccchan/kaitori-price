@@ -1,0 +1,19 @@
+{
+  "version": 2,
+  "functions": {
+    "api/chat.js": {
+      "maxDuration": 15
+    }
+  },
+  "routes": [
+    {
+      "src": "/admin(\\.html)?",
+      "status": 404,
+      "headers": { "Content-Type": "text/plain" }
+    },
+    {
+      "src": "/api/upload",
+      "status": 404
+    }
+  ]
+}
