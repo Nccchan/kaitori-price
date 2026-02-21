@@ -882,9 +882,28 @@ async function initLineSDK() {
   }
 }
 
+function validateAndRefreshCartPrices() {
+  const changed = [];
+  for (const item of cart) {
+    const currentItem = allData[item.category]?.items?.find(d => d.model === item.model);
+    if (!currentItem) continue;
+    const rawPrice = item.shrinkType === 'shrink' ? currentItem.shrink : currentItem.noshrink;
+    const currentPrice = parseInt(String(rawPrice || '0').replace(/[^0-9]/g, ''), 10) || 0;
+    if (currentPrice > 0 && currentPrice !== item.price) {
+      changed.push({ name: item.name, model: item.model, oldPrice: item.price, newPrice: currentPrice });
+      item.price = currentPrice;
+    }
+  }
+  if (changed.length > 0) saveCart();
+  return changed;
+}
+
 function openCheckoutModal() {
   const el = document.getElementById('checkoutModal');
   if (!el) return;
+
+  // 価格の再検証
+  const changed = validateAndRefreshCartPrices();
 
   // フォームをリセット
   const form = document.getElementById('checkoutForm');
@@ -893,8 +912,20 @@ function openCheckoutModal() {
   const submitBtn = document.getElementById('checkoutSubmit');
   if (form) form.hidden = false;
   if (done) done.hidden = true;
-  if (errEl) errEl.hidden = true;
   if (submitBtn) submitBtn.disabled = false;
+
+  // 価格変動があれば警告を表示
+  if (errEl) {
+    if (changed.length > 0) {
+      const lines = changed.map(c =>
+        `・${c.name}（${c.model}）: ¥${c.oldPrice.toLocaleString()} → ¥${c.newPrice.toLocaleString()}`
+      );
+      errEl.textContent = `⚠️ 以下の商品の買取価格が更新されました。最新価格に自動修正しました。\n${lines.join('\n')}`;
+      errEl.hidden = false;
+    } else {
+      errEl.hidden = true;
+    }
+  }
 
   renderCheckoutPreview();
 
