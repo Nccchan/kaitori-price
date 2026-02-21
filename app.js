@@ -1013,6 +1013,19 @@ async function submitCheckout() {
   if (email) payload.email = email;
   if (_memberJwt) payload.member_jwt = _memberJwt;
 
+  // テストモード（?testMode=1）：APIをスキップして完了画面を表示
+  const isTestMode = new URLSearchParams(location.search).get('testMode') === '1';
+  if (isTestMode) {
+    const snapshot = cart.map(c => ({ ...c }));
+    clearCart();
+    renderReceipt(snapshot, { reception_id: 'TEST01' });
+    const form = document.getElementById('checkoutForm');
+    const done = document.getElementById('checkoutDone');
+    if (form) form.hidden = true;
+    if (done) done.hidden = false;
+    return;
+  }
+
   // Recore API 送信
   try {
     const res = await fetch('https://co-api.recore-pos.com/bad/offer', {
@@ -1281,3 +1294,9 @@ function wireChat() {
 }
 
 wireChat();
+
+// テストモードバナー
+if (new URLSearchParams(location.search).get('testMode') === '1') {
+  const banner = document.getElementById('testModeBanner');
+  if (banner) banner.hidden = false;
+}
