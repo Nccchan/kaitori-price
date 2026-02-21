@@ -1016,20 +1016,28 @@ async function submitCheckout() {
   const email = (document.getElementById('co_email')?.value || '').trim();
   const extraComment = (document.getElementById('co_comment')?.value || '').trim();
 
-  // バリデーション
-  const errors = [];
-  if (!lastName) errors.push('氏名（姓）を入力してください');
-  if (!firstName) errors.push('氏名（名）を入力してください');
-  if (!tel) {
-    errors.push('電話番号を入力してください');
-  } else if (!/(?:^0[0-9]{9,10}$)|(?:^0[0-9]{1,3}-[0-9]{2,4}-[0-9]{3,4}$)/.test(tel)) {
-    errors.push('電話番号の形式が正しくありません');
-  }
+  const isTestMode = new URLSearchParams(location.search).get('testMode') === '1';
 
-  if (errors.length > 0) {
-    if (errEl) { errEl.textContent = errors.join('\n'); errEl.hidden = false; }
-    document.getElementById('checkoutModal')?.querySelector('.checkout-modal__body')?.scrollTo({ top: 0, behavior: 'smooth' });
-    return;
+  // バリデーション（テストモードはスキップしてダミーデータで補完）
+  if (isTestMode) {
+    if (!lastName) { const el = document.getElementById('co_last_name'); if (el) el.value = 'テスト'; }
+    if (!firstName) { const el = document.getElementById('co_first_name'); if (el) el.value = '太郎'; }
+    if (!tel) { const el = document.getElementById('co_tel'); if (el) el.value = '09000000000'; }
+  } else {
+    const errors = [];
+    if (!lastName) errors.push('氏名（姓）を入力してください');
+    if (!firstName) errors.push('氏名（名）を入力してください');
+    if (!tel) {
+      errors.push('電話番号を入力してください');
+    } else if (!/(?:^0[0-9]{9,10}$)|(?:^0[0-9]{1,3}-[0-9]{2,4}-[0-9]{3,4}$)/.test(tel)) {
+      errors.push('電話番号の形式が正しくありません');
+    }
+
+    if (errors.length > 0) {
+      if (errEl) { errEl.textContent = errors.join('\n'); errEl.hidden = false; }
+      document.getElementById('checkoutModal')?.querySelector('.checkout-modal__body')?.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
   }
 
   if (errEl) errEl.hidden = true;
@@ -1056,7 +1064,6 @@ async function submitCheckout() {
   if (_memberJwt) payload.member_jwt = _memberJwt;
 
   // テストモード（?testMode=1）：APIをスキップして完了画面を表示
-  const isTestMode = new URLSearchParams(location.search).get('testMode') === '1';
   if (isTestMode) {
     const snapshot = cart.map(c => ({ ...c }));
     clearCart();
