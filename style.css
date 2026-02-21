@@ -333,3 +333,31 @@ html.is-modal-open,body.is-modal-open{overflow:hidden}
   .chat-widget{bottom:16px;right:12px}
   .chat-panel{width:calc(100vw - 24px)}
 }
+
+/* ===== ご利用方法 ===== */
+.howto{padding:48px 0 52px;border-top:1px solid var(--line)}
+.howto__title{font-size:22px;font-weight:900;text-align:center;margin:0 0 6px}
+.howto__lead{text-align:center;color:var(--muted);font-size:14px;margin:0 0 32px}
+
+.howto__steps{display:grid;gap:14px;margin-bottom:20px}
+.howto__step{display:flex;gap:16px;align-items:flex-start;border:1px solid var(--line);border-radius:var(--radius);background:rgba(255,255,255,0.88);padding:18px;box-shadow:var(--shadow)}
+.howto__step-num{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,rgba(124,58,237,0.95),rgba(59,130,246,0.85));color:#fff;font-weight:900;font-size:15px;display:grid;place-items:center;flex:0 0 auto;box-shadow:0 4px 14px rgba(124,58,237,0.28)}
+.howto__step-body{min-width:0}
+.howto__step-title{font-weight:900;font-size:15px;margin-bottom:6px}
+.howto__step-text{font-size:13px;color:var(--muted);line-height:1.75}
+
+.howto__address{margin-top:10px;border:1px solid rgba(124,58,237,0.22);border-radius:12px;background:linear-gradient(135deg,rgba(124,58,237,0.06),rgba(34,197,94,0.04));padding:10px 12px;font-size:13px;line-height:1.75}
+.howto__address-label{font-weight:900;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px}
+
+.howto__extras{display:grid;gap:14px}
+@media(min-width:640px){.howto__extras{grid-template-columns:1fr 1fr}}
+
+.howto__campaign{display:flex;gap:14px;align-items:flex-start;border:1px solid rgba(34,197,94,0.38);border-radius:var(--radius);background:linear-gradient(135deg,rgba(34,197,94,0.10),rgba(59,130,246,0.06));padding:18px;box-shadow:var(--shadow)}
+.howto__campaign-icon{font-size:26px;flex:0 0 auto;line-height:1}
+.howto__campaign-title{font-weight:900;font-size:15px;margin-bottom:5px}
+.howto__campaign-text{font-size:13px;color:var(--muted);line-height:1.7}
+
+.howto__packing{border:1px solid var(--line);border-radius:var(--radius);background:rgba(255,255,255,0.88);padding:18px;box-shadow:var(--shadow)}
+.howto__packing-title{font-weight:900;font-size:15px;margin-bottom:10px}
+.howto__packing-list{margin:0;padding:0 0 0 18px;display:grid;gap:6px}
+.howto__packing-list li{font-size:13px;color:var(--muted);line-height:1.65}
