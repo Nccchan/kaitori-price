@@ -51,6 +51,7 @@ Claude Code 起動時に自動で読み込まれるファイルです。
 | `ANTHROPIC_API_KEY` | AIチャットボット | 設定済み |
 | `RESEND_API_KEY` | 申込完了メール送信 | 設定済み |
 | `RESEND_FROM_EMAIL` | 送信元メールアドレス | `info@aigive.jp` |
+| `RECORE_API_KEY` | Recore買取申込API（`api/submit-offer.js`経由） | **未設定・Recoreから発行されたら設定** |
 
 ローカル開発時は `/home/user/kaitori-price/.env` に同じ変数を設定（gitignore済み）。
 
@@ -67,8 +68,9 @@ Claude Code 起動時に自動で読み込まれるファイルです。
 
 ### Recore API連携
 - エンドポイント: `POST https://co-api.recore-pos.com/bad/offer`
-- 認証: `X-Identification` ヘッダ（`app.js` の `RECORE_API_KEY` 定数）
-- **APIキー未設定のため現在は接続不可** → `app.js` 冒頭の定数に設定が必要
+- 認証: `X-Identification` ヘッダ（Vercel環境変数 `RECORE_API_KEY`）
+- **APIキー未設定のため現在は接続不可** → Vercel環境変数 `RECORE_API_KEY` に設定が必要
+- フロントエンドは直接Recoreを呼ばず、`/api/submit-offer.js` を経由する（セキュリティ対策）
 - カート内容は `comment` フィールドにテキスト形式で送信（商品名・数量・単価・合計）
 - `is_pickup: false`（ヤマト自動集荷なし）
 - `message_channel: 'LINE'`（LINE通知）
@@ -184,3 +186,10 @@ Claude Code 起動時に自動で読み込まれるファイルです。
 | 必要書類・注意事項・送料キャンペーン詳細をご利用方法に追加 | `index.html` `style.css` | 「必要書類」セクション（初回/2回目以降）、「注意事項」セクション（有効期限・自動減額）、送料キャンペーンの地域別詳細を追加 |
 | 上部にもボタンを設置してほしい（利用者がわかるよう） | `index.html` `style.css` | タブ直下にクイックナビボタン3点を追加（ご利用方法・必要書類・送料発送）。ページ下部のご利用方法セクションへジャンプする機能 |
 | CLAUDE.md を大幅更新 | `CLAUDE.md` | 前セッションの全変更内容・アーキテクチャ・TODO・環境変数を記録 |
+
+### 2026-02-22（本セッション）
+
+| 依頼 | 対応ファイル | 変更内容 |
+|------|-------------|---------|
+| APIキーのセキュリティ修正 | `api/submit-offer.js` `app.js` | `RECORE_API_KEY` を `app.js`（公開ファイル）から削除し、Vercel環境変数に移動。フロントエンドは `/api/submit-offer` 経由でRecoreを呼ぶ |
+| フロントエンド会員機能（localStorage） | `app.js` `index.html` `style.css` | 申込完了後に個人情報をlocalStorageに保存。次回チェックアウト時に自動入力＋「前回の情報を自動入力しました」バナー＋クリアボタン |

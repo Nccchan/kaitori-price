@@ -218,6 +218,12 @@ a{color:inherit}
 .checkout-preview__item:last-of-type{border-bottom:none}
 .checkout-preview__total{font-weight:900;font-size:13px;margin-top:8px;padding-top:8px;border-top:1px solid var(--line)}
 
+/* Saved member banner */
+.saved-member-banner{display:flex;align-items:center;gap:8px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:10px 14px;font-size:13px;color:#166534;margin-bottom:12px}
+.saved-member-banner span{flex:1}
+.saved-member-clear{background:none;border:1px solid #86efac;border-radius:6px;padding:3px 10px;font-size:12px;color:#166534;cursor:pointer}
+.saved-member-clear:hover{background:#dcfce7}
+
 /* Submit & error */
 .checkout-error{border:1px solid rgba(239,68,68,0.4);border-radius:12px;background:rgba(239,68,68,0.07);padding:12px;font-size:13px;color:rgba(200,30,30,0.9);margin-bottom:12px;white-space:pre-wrap;line-height:1.5}
 .checkout-submit{width:100%;border:none;background:linear-gradient(135deg,rgba(124,58,237,0.92),rgba(59,130,246,0.85));color:#fff;padding:15px;border-radius:999px;font-weight:900;font-size:16px;cursor:pointer;margin-top:4px}

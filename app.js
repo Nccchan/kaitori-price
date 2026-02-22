@@ -3,10 +3,35 @@
 const SHEET_ID = '1PBMNNYHliomlgeNsvZgiccrfOWpIJbYPb9EMFtSAgdw';
 
 // ===== Recore API 設定 =====
-// NOVASTOより発行されたAPIキーを設定してください
-const RECORE_API_KEY = '<Recoreより発行されたAPIキーを設定>';
+// APIキーはVercel環境変数 RECORE_API_KEY に設定してください（このファイルには書かない）
 // LINEミニアプリのWebアプリURLを設定してください（不要な場合は空文字のまま）
 const MEMBER_APP_URL = '';
+
+// ===== フロントエンド会員情報（localStorage）=====
+const MEMBER_STORAGE_KEY = 'nikoniko_member';
+
+function saveMemberToStorage(lastName, firstName, tel, email) {
+  try {
+    localStorage.setItem(MEMBER_STORAGE_KEY, JSON.stringify({ lastName, firstName, tel, email }));
+  } catch { /* ignore */ }
+}
+
+function loadMemberFromStorage() {
+  try {
+    const raw = localStorage.getItem(MEMBER_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch { return null; }
+}
+
+function clearSavedMemberAndForm() {
+  try { localStorage.removeItem(MEMBER_STORAGE_KEY); } catch { /* ignore */ }
+  ['co_last_name', 'co_first_name', 'co_tel', 'co_email'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  const banner = document.getElementById('savedMemberBanner');
+  if (banner) banner.hidden = true;
+}
 
 const CATEGORIES = {
   pokemon: { label: 'ポケモンカード', sheetName: 'ポケモン', imageDir: 'pokemon' },
@@ -940,6 +965,20 @@ function openCheckoutModal() {
 
   renderCheckoutPreview();
 
+  // 保存済み会員情報を自動入力（フィールドが空の場合のみ）
+  const saved = loadMemberFromStorage();
+  const banner = document.getElementById('savedMemberBanner');
+  if (saved) {
+    const fill = (id, val) => { const f = document.getElementById(id); if (f && !f.value && val) f.value = val; };
+    fill('co_last_name', saved.lastName);
+    fill('co_first_name', saved.firstName);
+    fill('co_tel', saved.tel);
+    fill('co_email', saved.email);
+    if (banner) banner.hidden = false;
+  } else {
+    if (banner) banner.hidden = true;
+  }
+
   el.hidden = false;
   setModalOpen(true);
 }
@@ -1093,20 +1132,18 @@ async function submitCheckout() {
     return;
   }
 
-  // Recore API 送信
+  // Recore API 送信（/api/submit-offer 経由でAPIキーをサーバーサイドに保管）
   try {
-    const res = await fetch('https://co-api.recore-pos.com/bad/offer', {
+    const res = await fetch('/api/submit-offer', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Identification': RECORE_API_KEY,
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     });
 
     const data = await res.json().catch(() => null);
 
     if (res.ok) {
+      saveMemberToStorage(lastName, firstName, tel, email);
       const snapshot = cart.map(c => ({ ...c }));
       clearCart();
       renderReceipt(snapshot, data);
@@ -1196,6 +1233,7 @@ function wireCart() {
   document.getElementById('checkoutModalBd')?.addEventListener('click', closeCheckoutModal);
   document.getElementById('checkoutModalClose')?.addEventListener('click', closeCheckoutModal);
   document.getElementById('checkoutSubmit')?.addEventListener('click', openTermsModal);
+  document.getElementById('savedMemberClear')?.addEventListener('click', clearSavedMemberAndForm);
   document.getElementById('termsModalBd')?.addEventListener('click', closeTermsModal);
   document.getElementById('termsModalClose')?.addEventListener('click', closeTermsModal);
   document.getElementById('termsDeclineBtn')?.addEventListener('click', closeTermsModal);
