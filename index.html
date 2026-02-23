@@ -416,6 +416,43 @@
           <div class="checkout-done__text">ご利用いただきありがとうございました。</div>
           <div class="checkout-done__email-notice">📧 ご登録のメールアドレスに見積書を送信しました。届いていない場合は迷惑メールフォルダもご確認ください。</div>
 
+          <!-- 次にやること -->
+          <div class="next-steps">
+            <div class="next-steps__title">📋 次にやること</div>
+            <ol class="next-steps__list">
+
+              <li class="next-steps__item">
+                <div class="next-steps__num">1</div>
+                <div class="next-steps__body">
+                  <div class="next-steps__label">本人確認</div>
+                  <div id="ekycStep" hidden>
+                    <a id="ekycStartBtn" class="ekyc-start-btn" href="#" target="_blank" rel="noopener noreferrer">🔐 本人確認（eKYC）を開始する →</a>
+                    <button id="ekycDoneBtn" class="ekyc-done-btn" type="button">すでに完了している</button>
+                    <div class="next-steps__or">eKYCを利用しない場合は↓</div>
+                  </div>
+                  <p class="next-steps__desc">3か月以内に取得した<strong>住民票または印鑑証明書写し（原本）＋ 本人確認書類</strong>を商品と同梱してください。<br><small>※ 2回目以降は本人確認書類のみ</small></p>
+                </div>
+              </li>
+
+              <li class="next-steps__item">
+                <div class="next-steps__num">2</div>
+                <div class="next-steps__body">
+                  <div class="next-steps__label">発送</div>
+                  <p class="next-steps__desc">見積書を印刷して商品に同梱し、段ボールに<strong>受付ID（<span class="receipt__id-inline">—</span>）</strong>を大きく記載して発送してください。</p>
+                </div>
+              </li>
+
+              <li class="next-steps__item">
+                <div class="next-steps__num">3</div>
+                <div class="next-steps__body">
+                  <div class="next-steps__label">追跡番号の連絡</div>
+                  <p class="next-steps__desc">発送後、必ず<strong>追跡番号をLINEでご連絡</strong>ください。</p>
+                </div>
+              </li>
+
+            </ol>
+          </div>
+
           <!-- 見積書 -->
           <div class="receipt" id="receiptBlock">
             <div class="receipt__header">
@@ -457,14 +494,6 @@
             <button id="checkoutDoneClose" class="checkout-submit checkout-submit--outline" type="button">閉じる</button>
           </div>
 
-          <!-- eKYC 本人確認ステップ -->
-          <div class="ekyc-step" id="ekycStep" hidden>
-            <div class="ekyc-step__badge">NEXT STEP</div>
-            <div class="ekyc-step__title">📋 本人確認（eKYC）が必要です</div>
-            <div class="ekyc-step__text">お取引には本人確認が必要です。下のボタンから本人確認を行ってください。<br>書類の準備ができたらそのままお進みください。</div>
-            <a id="ekycStartBtn" class="ekyc-start-btn" href="#" target="_blank" rel="noopener noreferrer">本人確認（eKYC）を開始する →</a>
-            <button id="ekycDoneBtn" class="ekyc-done-btn" type="button">すでに完了している</button>
-          </div>
         </div>
       </div>
     </div>
