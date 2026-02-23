@@ -1296,7 +1296,7 @@ function wireCart() {
   const ekycStep = document.getElementById('ekycStep');
   const ekycStartBtn = document.getElementById('ekycStartBtn');
   const ekycDoneBtn = document.getElementById('ekycDoneBtn');
-  const ekycUrl = EKYC_URL || (TEST_MODE ? '#ekyc-test' : '');
+  const ekycUrl = EKYC_URL || (new URLSearchParams(location.search).get('testMode') === '1' ? '#ekyc-test' : '');
   if (ekycUrl) {
     if (ekycStep) ekycStep.hidden = false;
     if (ekycStartBtn) ekycStartBtn.href = ekycUrl;
