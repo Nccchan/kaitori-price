@@ -1296,9 +1296,10 @@ function wireCart() {
   const ekycStep = document.getElementById('ekycStep');
   const ekycStartBtn = document.getElementById('ekycStartBtn');
   const ekycDoneBtn = document.getElementById('ekycDoneBtn');
-  if (EKYC_URL) {
+  const ekycUrl = EKYC_URL || (TEST_MODE ? '#ekyc-test' : '');
+  if (ekycUrl) {
     if (ekycStep) ekycStep.hidden = false;
-    if (ekycStartBtn) ekycStartBtn.href = EKYC_URL;
+    if (ekycStartBtn) ekycStartBtn.href = ekycUrl;
   }
   ekycDoneBtn?.addEventListener('click', closeCheckoutModal);
 
