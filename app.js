@@ -3,10 +3,35 @@
 const SHEET_ID = '1PBMNNYHliomlgeNsvZgiccrfOWpIJbYPb9EMFtSAgdw';
 
 // ===== Recore API 設定 =====
-// NOVASTOより発行されたAPIキーを設定してください
-const RECORE_API_KEY = '<Recoreより発行されたAPIキーを設定>';
+// APIキーはVercel環境変数 RECORE_API_KEY に設定してください（このファイルには書かない）
 // LINEミニアプリのWebアプリURLを設定してください（不要な場合は空文字のまま）
 const MEMBER_APP_URL = '';
+
+// ===== フロントエンド会員情報（localStorage）=====
+const MEMBER_STORAGE_KEY = 'nikoniko_member';
+
+function saveMemberToStorage(lastName, firstName, tel, email, bankName, bankBranch, bankType, bankNumber, bankHolder) {
+  try {
+    localStorage.setItem(MEMBER_STORAGE_KEY, JSON.stringify({ lastName, firstName, tel, email, bankName, bankBranch, bankType, bankNumber, bankHolder }));
+  } catch { /* ignore */ }
+}
+
+function loadMemberFromStorage() {
+  try {
+    const raw = localStorage.getItem(MEMBER_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch { return null; }
+}
+
+function clearSavedMemberAndForm() {
+  try { localStorage.removeItem(MEMBER_STORAGE_KEY); } catch { /* ignore */ }
+  ['co_last_name', 'co_first_name', 'co_tel', 'co_email', 'co_bank_name', 'co_bank_branch', 'co_bank_type', 'co_bank_number', 'co_bank_holder'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  const banner = document.getElementById('savedMemberBanner');
+  if (banner) banner.hidden = true;
+}
 
 const CATEGORIES = {
   pokemon: { label: 'ポケモンカード', sheetName: 'ポケモン', imageDir: 'pokemon' },
@@ -613,7 +638,7 @@ function getCartSummary() {
   return { count, amount };
 }
 
-function buildCommentText(extraComment) {
+function buildCommentText(extraComment, bankInfo) {
   const lines = ['【買取申込商品リスト】'];
   for (const item of cart) {
     const sub = item.price * item.quantity;
@@ -622,6 +647,15 @@ function buildCommentText(extraComment) {
   const { count, amount } = getCartSummary();
   lines.push('---');
   lines.push(`合計: ${count}点 / 合計金額: ¥${amount.toLocaleString()}`);
+  if (bankInfo) {
+    lines.push('');
+    lines.push('【振込先口座】');
+    lines.push(`銀行名: ${bankInfo.bankName}`);
+    lines.push(`支店名: ${bankInfo.bankBranch}`);
+    lines.push(`口座種別: ${bankInfo.bankType}`);
+    lines.push(`口座番号: ${bankInfo.bankNumber}`);
+    lines.push(`口座名義: ${bankInfo.bankHolder}`);
+  }
   if (extraComment && extraComment.trim()) {
     lines.push('');
     lines.push('【お客様備考】');
@@ -940,6 +974,25 @@ function openCheckoutModal() {
 
   renderCheckoutPreview();
 
+  // 保存済み会員情報を自動入力（フィールドが空の場合のみ）
+  const saved = loadMemberFromStorage();
+  const banner = document.getElementById('savedMemberBanner');
+  if (saved) {
+    const fill = (id, val) => { const f = document.getElementById(id); if (f && !f.value && val) f.value = val; };
+    fill('co_last_name', saved.lastName);
+    fill('co_first_name', saved.firstName);
+    fill('co_tel', saved.tel);
+    fill('co_email', saved.email);
+    fill('co_bank_name', saved.bankName);
+    fill('co_bank_branch', saved.bankBranch);
+    fill('co_bank_type', saved.bankType);
+    fill('co_bank_number', saved.bankNumber);
+    fill('co_bank_holder', saved.bankHolder);
+    if (banner) banner.hidden = false;
+  } else {
+    if (banner) banner.hidden = true;
+  }
+
   el.hidden = false;
   setModalOpen(true);
 }
@@ -956,10 +1009,20 @@ function openTermsModal() {
   const lastName = (document.getElementById('co_last_name')?.value || '').trim();
   const firstName = (document.getElementById('co_first_name')?.value || '').trim();
   const tel = (document.getElementById('co_tel')?.value || '').trim();
+  const bankName = (document.getElementById('co_bank_name')?.value || '').trim();
+  const bankBranch = (document.getElementById('co_bank_branch')?.value || '').trim();
+  const bankType = (document.getElementById('co_bank_type')?.value || '').trim();
+  const bankNumber = (document.getElementById('co_bank_number')?.value || '').trim();
+  const bankHolder = (document.getElementById('co_bank_holder')?.value || '').trim();
   const errors = [];
   if (!lastName) errors.push('氏名（姓）を入力してください');
   if (!firstName) errors.push('氏名（名）を入力してください');
   if (!tel) errors.push('電話番号を入力してください');
+  if (!bankName) errors.push('銀行名を入力してください');
+  if (!bankBranch) errors.push('支店名を入力してください');
+  if (!bankType) errors.push('口座種別を選択してください');
+  if (!bankNumber) errors.push('口座番号を入力してください');
+  if (!bankHolder) errors.push('口座名義を入力してください');
   if (errors.length > 0) {
     if (errEl) { errEl.textContent = errors.join('\n'); errEl.hidden = false; }
     return;
@@ -1028,9 +1091,19 @@ async function submitCheckout() {
     const elLast = document.getElementById('co_last_name');
     const elFirst = document.getElementById('co_first_name');
     const elTel = document.getElementById('co_tel');
+    const elBankName = document.getElementById('co_bank_name');
+    const elBankBranch = document.getElementById('co_bank_branch');
+    const elBankType = document.getElementById('co_bank_type');
+    const elBankNumber = document.getElementById('co_bank_number');
+    const elBankHolder = document.getElementById('co_bank_holder');
     if (elLast && !elLast.value.trim()) elLast.value = 'テスト';
     if (elFirst && !elFirst.value.trim()) elFirst.value = '太郎';
     if (elTel && !elTel.value.trim()) elTel.value = '09000000000';
+    if (elBankName && !elBankName.value.trim()) elBankName.value = 'テスト銀行';
+    if (elBankBranch && !elBankBranch.value.trim()) elBankBranch.value = '本店';
+    if (elBankType && !elBankType.value.trim()) elBankType.value = '普通';
+    if (elBankNumber && !elBankNumber.value.trim()) elBankNumber.value = '1234567';
+    if (elBankHolder && !elBankHolder.value.trim()) elBankHolder.value = 'テスト タロウ';
   }
 
   let lastName = (document.getElementById('co_last_name')?.value || '').trim();
@@ -1038,6 +1111,11 @@ async function submitCheckout() {
   let tel = (document.getElementById('co_tel')?.value || '').trim();
   const email = (document.getElementById('co_email')?.value || '').trim();
   const extraComment = (document.getElementById('co_comment')?.value || '').trim();
+  const bankName = (document.getElementById('co_bank_name')?.value || '').trim();
+  const bankBranch = (document.getElementById('co_bank_branch')?.value || '').trim();
+  const bankType = (document.getElementById('co_bank_type')?.value || '').trim();
+  const bankNumber = (document.getElementById('co_bank_number')?.value || '').trim();
+  const bankHolder = (document.getElementById('co_bank_holder')?.value || '').trim();
 
   // バリデーション（テストモードはスキップ）
   if (!isTestMode) {
@@ -1049,6 +1127,11 @@ async function submitCheckout() {
     } else if (!/(?:^0[0-9]{9,10}$)|(?:^0[0-9]{1,3}-[0-9]{2,4}-[0-9]{3,4}$)/.test(tel)) {
       errors.push('電話番号の形式が正しくありません');
     }
+    if (!bankName) errors.push('銀行名を入力してください');
+    if (!bankBranch) errors.push('支店名を入力してください');
+    if (!bankType) errors.push('口座種別を選択してください');
+    if (!bankNumber) errors.push('口座番号を入力してください');
+    if (!bankHolder) errors.push('口座名義を入力してください');
 
     if (errors.length > 0) {
       if (errEl) { errEl.textContent = errors.join('\n'); errEl.hidden = false; }
@@ -1068,7 +1151,8 @@ async function submitCheckout() {
   } catch { /* ignore */ }
 
   // ペイロード構築
-  const comment = buildCommentText(extraComment);
+  const bankInfo = { bankName, bankBranch, bankType, bankNumber, bankHolder };
+  const comment = buildCommentText(extraComment, bankInfo);
   const payload = {
     is_pickup: false,
     last_name: lastName,
@@ -1085,6 +1169,7 @@ async function submitCheckout() {
     const snapshot = cart.map(c => ({ ...c }));
     clearCart();
     renderReceipt(snapshot, { reception_id: 'TEST01' });
+    saveMemberToStorage(lastName, firstName, tel, email, bankName, bankBranch, bankType, bankNumber, bankHolder);
     sendReceiptEmail(email, `${lastName} ${firstName}`, 'TEST01', snapshot);
     const form = document.getElementById('checkoutForm');
     const done = document.getElementById('checkoutDone');
@@ -1093,20 +1178,18 @@ async function submitCheckout() {
     return;
   }
 
-  // Recore API 送信
+  // Recore API 送信（/api/submit-offer 経由でAPIキーをサーバーサイドに保管）
   try {
-    const res = await fetch('https://co-api.recore-pos.com/bad/offer', {
+    const res = await fetch('/api/submit-offer', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Identification': RECORE_API_KEY,
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     });
 
     const data = await res.json().catch(() => null);
 
     if (res.ok) {
+      saveMemberToStorage(lastName, firstName, tel, email, bankName, bankBranch, bankType, bankNumber, bankHolder);
       const snapshot = cart.map(c => ({ ...c }));
       clearCart();
       renderReceipt(snapshot, data);
@@ -1196,6 +1279,7 @@ function wireCart() {
   document.getElementById('checkoutModalBd')?.addEventListener('click', closeCheckoutModal);
   document.getElementById('checkoutModalClose')?.addEventListener('click', closeCheckoutModal);
   document.getElementById('checkoutSubmit')?.addEventListener('click', openTermsModal);
+  document.getElementById('savedMemberClear')?.addEventListener('click', clearSavedMemberAndForm);
   document.getElementById('termsModalBd')?.addEventListener('click', closeTermsModal);
   document.getElementById('termsModalClose')?.addEventListener('click', closeTermsModal);
   document.getElementById('termsDeclineBtn')?.addEventListener('click', closeTermsModal);

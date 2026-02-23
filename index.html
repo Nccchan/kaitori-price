@@ -339,6 +339,11 @@
 
           <div id="checkoutCartPreview"></div>
 
+          <div id="savedMemberBanner" class="saved-member-banner" hidden>
+            <span>前回の情報を自動入力しました</span>
+            <button id="savedMemberClear" type="button" class="saved-member-clear">クリア</button>
+          </div>
+
           <div class="form-row">
             <div class="form-field">
               <label class="form-label" for="co_last_name">氏名（姓）<span class="form-required">必須</span></label>
@@ -363,6 +368,41 @@
           <div class="form-field">
             <label class="form-label" for="co_comment">備考（任意）</label>
             <textarea id="co_comment" class="form-input form-textarea" placeholder="何かあればご記入ください"></textarea>
+          </div>
+
+          <!-- 振込先口座情報 -->
+          <div class="form-section-title">振込先口座情報</div>
+          <p class="checkout-modal__note">査定後のお振込先口座をご入力ください。</p>
+
+          <div class="form-row">
+            <div class="form-field">
+              <label class="form-label" for="co_bank_name">銀行名<span class="form-required">必須</span></label>
+              <input id="co_bank_name" class="form-input" type="text" placeholder="○○銀行" autocomplete="off">
+            </div>
+            <div class="form-field">
+              <label class="form-label" for="co_bank_branch">支店名<span class="form-required">必須</span></label>
+              <input id="co_bank_branch" class="form-input" type="text" placeholder="△△支店" autocomplete="off">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-field">
+              <label class="form-label" for="co_bank_type">口座種別<span class="form-required">必須</span></label>
+              <select id="co_bank_type" class="form-input form-select">
+                <option value="">選択してください</option>
+                <option value="普通">普通</option>
+                <option value="当座">当座</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label class="form-label" for="co_bank_number">口座番号<span class="form-required">必須</span></label>
+              <input id="co_bank_number" class="form-input" type="text" placeholder="1234567" autocomplete="off" inputmode="numeric" maxlength="8">
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label class="form-label" for="co_bank_holder">口座名義（カタカナ）<span class="form-required">必須</span></label>
+            <input id="co_bank_holder" class="form-input" type="text" placeholder="タナカ タロウ" autocomplete="off">
           </div>
 
           <div id="checkoutError" class="checkout-error" hidden></div>
