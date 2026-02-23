@@ -241,6 +241,15 @@ a{color:inherit}
 .checkout-done__text{color:var(--muted);font-size:14px;line-height:1.6;margin-bottom:16px}
 .checkout-done__email-notice{background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:12px 16px;font-size:13px;color:#1e40af;line-height:1.6;margin-bottom:16px}
 .checkout-done__actions{display:flex;flex-direction:column;gap:10px;margin-top:20px}
+/* eKYC step */
+.ekyc-step{background:#eff6ff;border:2px solid #1a56db;border-radius:16px;padding:20px;margin-top:20px;text-align:center}
+.ekyc-step__badge{display:inline-block;background:#1a56db;color:#fff;font-size:10px;font-weight:900;letter-spacing:1.5px;padding:2px 8px;border-radius:4px;margin-bottom:10px}
+.ekyc-step__title{font-weight:900;font-size:15px;margin-bottom:6px}
+.ekyc-step__text{font-size:13px;color:#374151;line-height:1.6;margin-bottom:16px}
+.ekyc-start-btn{display:block;background:#1a56db;color:#fff;text-align:center;padding:13px;border-radius:12px;font-weight:700;font-size:14px;text-decoration:none;margin-bottom:8px}
+.ekyc-start-btn:hover{background:#1e40af}
+.ekyc-done-btn{display:block;width:100%;background:none;border:1px solid #9ca3af;color:#6b7280;padding:10px;border-radius:12px;font-size:13px;cursor:pointer;font-family:inherit}
+.ekyc-done-btn:hover{background:#f9fafb}
 
 /* 見積書 */
 .receipt{border:2px solid rgba(124,58,237,0.35);border-radius:16px;background:#fff;padding:20px;margin:18px 0;text-align:left;font-size:13px}
