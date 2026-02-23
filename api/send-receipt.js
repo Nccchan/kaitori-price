@@ -5,7 +5,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { to, name, receptionId, items } = req.body || {};
+  const { to, name, receptionId, items, ekycUrl } = req.body || {};
   if (!to || !name || !Array.isArray(items) || items.length === 0) {
     return res.status(400).json({ error: 'missing required fields' });
   }
@@ -87,6 +87,16 @@ export default async function handler(req, res) {
                 <li>ヤマト運輸・20箱以上で着払い発送が可能です（一部地域除く）</li>
               </ul>
             </div>
+
+            ${ekycUrl ? `
+            <!-- eKYC 本人確認 -->
+            <div style="background:#eff6ff;border:2px solid #1a56db;border-radius:8px;padding:20px;margin-top:20px;text-align:center;">
+              <div style="display:inline-block;background:#1a56db;color:#fff;font-size:10px;font-weight:700;letter-spacing:1.5px;padding:2px 8px;border-radius:4px;margin-bottom:10px;">NEXT STEP</div>
+              <div style="font-weight:700;font-size:15px;margin-bottom:6px;">📋 本人確認（eKYC）が必要です</div>
+              <div style="font-size:13px;color:#374151;margin-bottom:16px;">お取引には本人確認が必要です。下のボタンから本人確認を行ってください。</div>
+              <a href="${escHtml(ekycUrl)}" style="display:inline-block;background:#1a56db;color:#fff;padding:13px 28px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px;">本人確認（eKYC）を開始する →</a>
+            </div>
+            ` : ''}
           </td>
         </tr>
 

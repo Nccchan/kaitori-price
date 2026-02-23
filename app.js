@@ -7,6 +7,9 @@ const SHEET_ID = '1PBMNNYHliomlgeNsvZgiccrfOWpIJbYPb9EMFtSAgdw';
 // LINEミニアプリのWebアプリURLを設定してください（不要な場合は空文字のまま）
 const MEMBER_APP_URL = '';
 
+// eKYC 本人確認URL（承認後に設定してください。空文字のままだと完了画面に表示されません）
+const EKYC_URL = '';
+
 // ===== フロントエンド会員情報（localStorage）=====
 const MEMBER_STORAGE_KEY = 'nikoniko_member';
 
@@ -1075,7 +1078,7 @@ async function sendReceiptEmail(email, name, receptionId, items) {
     await fetch('/api/send-receipt', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ to: email, name, receptionId, items }),
+      body: JSON.stringify({ to: email, name, receptionId, items, ekycUrl: EKYC_URL || null }),
     });
   } catch { /* メール送信失敗は無視（申込自体は成功済み） */ }
 }
@@ -1288,6 +1291,17 @@ function wireCart() {
     submitCheckout();
   });
   document.getElementById('checkoutDoneClose')?.addEventListener('click', closeCheckoutModal);
+
+  // eKYC
+  const ekycStep = document.getElementById('ekycStep');
+  const ekycStartBtn = document.getElementById('ekycStartBtn');
+  const ekycDoneBtn = document.getElementById('ekycDoneBtn');
+  const ekycUrl = EKYC_URL || (new URLSearchParams(location.search).get('testMode') === '1' ? '#ekyc-test' : '');
+  if (ekycUrl) {
+    if (ekycStep) ekycStep.hidden = false;
+    if (ekycStartBtn) ekycStartBtn.href = ekycUrl;
+  }
+  ekycDoneBtn?.addEventListener('click', closeCheckoutModal);
 
   // バッジ初期化
   updateCartBadge();

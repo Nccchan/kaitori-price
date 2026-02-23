@@ -456,6 +456,15 @@
             <button id="receiptPrintBtn" class="checkout-submit" type="button" onclick="window.print()">🖨️ 印刷する</button>
             <button id="checkoutDoneClose" class="checkout-submit checkout-submit--outline" type="button">閉じる</button>
           </div>
+
+          <!-- eKYC 本人確認ステップ -->
+          <div class="ekyc-step" id="ekycStep" hidden>
+            <div class="ekyc-step__badge">NEXT STEP</div>
+            <div class="ekyc-step__title">📋 本人確認（eKYC）が必要です</div>
+            <div class="ekyc-step__text">お取引には本人確認が必要です。下のボタンから本人確認を行ってください。<br>書類の準備ができたらそのままお進みください。</div>
+            <a id="ekycStartBtn" class="ekyc-start-btn" href="#" target="_blank" rel="noopener noreferrer">本人確認（eKYC）を開始する →</a>
+            <button id="ekycDoneBtn" class="ekyc-done-btn" type="button">すでに完了している</button>
+          </div>
         </div>
       </div>
     </div>
