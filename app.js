@@ -37,9 +37,10 @@ function clearSavedMemberAndForm() {
 }
 
 const CATEGORIES = {
-  pokemon: { label: 'ポケモンカード', sheetName: 'ポケモン', imageDir: 'pokemon' },
-  onepiece: { label: 'ONE PIECE', sheetName: 'ワンピース', imageDir: 'onepiece', boxMode: true },
-  dragonball: { label: 'ドラゴンボール', sheetName: 'ドラゴンボール', imageDir: 'dragonball', boxMode: true },
+  pokemon:    { label: 'ポケモンカード',  sheetName: 'ポケモン',       imageDir: 'pokemon'    },
+  onepiece:   { label: 'ONE PIECE',      sheetName: 'ワンピース',     imageDir: 'onepiece',   boxMode: true },
+  dragonball: { label: 'ドラゴンボール',  sheetName: 'ドラゴンボール', imageDir: 'dragonball', boxMode: true },
+  yugioh:     { label: '遊戯王',         sheetName: '遊戯王',         imageDir: 'yugioh',     boxMode: true },
 };
 
 function getCatLabels(categoryKey) {

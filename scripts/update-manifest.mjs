@@ -16,7 +16,7 @@ const ROOT = join(__dirname, '..');
 const IMAGES_DIR = join(ROOT, 'images');
 const MANIFEST_PATH = join(IMAGES_DIR, 'manifest.json');
 
-const CATEGORIES = ['pokemon', 'onepiece', 'dragonball'];
+const CATEGORIES = ['pokemon', 'onepiece', 'dragonball', 'yugioh'];
 const EXT_PRIORITY = ['.png', '.webp', '.svg'];
 const ALLOWED_EXTS = new Set(EXT_PRIORITY);
 
