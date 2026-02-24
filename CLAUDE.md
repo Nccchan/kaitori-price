@@ -121,6 +121,77 @@ Claude Code 起動時に自動で読み込まれるファイルです。
 
 ---
 
+## 商品・カテゴリ追加手順
+
+### A. 既存カテゴリに商品（弾）を追加する場合
+
+#### 手順
+1. **Google スプレッドシートに行を追加**
+   - 対象シート（ポケモン／ワンピース／ドラゴンボール）を開く
+   - 新商品の行を追加（商品コード・商品名・価格など）
+   - 商品コードは `OP-15` `SV12` のように他と形式を揃える
+   - 保存するだけで本番サイトに即時反映される（キャッシュなし）
+
+2. **商品画像を用意してGitHubにアップロード**
+   - ファイル名 = 商品コード（例: `OP-15.png`）
+   - 推奨サイズ: 縦横比 3:4 程度・500KB 前後
+   - GitHubのWebUI: `images/onepiece/` フォルダを開き「Add file → Upload files」
+   - **アップロード先フォルダ（カテゴリ別）**:
+     - ポケモン → `images/pokemon/`
+     - ワンピース → `images/onepiece/`
+     - ドラゴンボール → `images/dragonball/`
+
+3. **Claude Code に manifest.json 更新を依頼**
+   - GitHubへのアップロード後、Claude Codeに「manifest を更新して」と伝える
+   - Claude Code が `node scripts/update-manifest.mjs` を実行してコミット・プッシュ
+   - または自分でコマンド実行も可: `node scripts/update-manifest.mjs && git add images/manifest.json && git commit -m "manifest: XX を追加"`
+
+   > **注意**: GitHub Web UI からアップロードした画像は `main` ブランチに入る。
+   > Claude Code が動いているブランチ（`claude/...`）から `git cherry-pick` で取り込む必要がある。
+   > この作業も「manifest を更新して」と依頼するだけで Claude Code が行う。
+
+#### ファイル不要の場合
+- 画像なしでもサイトは動作する（プレースホルダー画像 `images/placeholder.svg` が表示される）
+- まず Google Sheets に行を追加して動作確認し、後から画像を追加しても問題ない
+
+---
+
+### B. 新しいカテゴリ（例: 遊戯王）を追加する場合
+
+#### 手順
+1. **Google スプレッドシートに新しいシートを追加**
+   - スプレッドシート ID: `1PBMNNYHliomlgeNsvZgiccrfOWpIJbYPb9EMFtSAgdw`
+   - シート名を決める（例: `遊戯王`）。この名前をそのまま `app.js` に書く
+
+2. **`app.js` の `CATEGORIES` にエントリを追加**（Claude Code に依頼）
+   ```js
+   // app.js の CATEGORIES 定数（先頭付近）
+   const CATEGORIES = {
+     pokemon:    { label: 'ポケモンカード',  sheetName: 'ポケモン',     imageDir: 'pokemon'    },
+     onepiece:   { label: 'ONE PIECE',      sheetName: 'ワンピース',   imageDir: 'onepiece',  boxMode: true },
+     dragonball: { label: 'ドラゴンボール',  sheetName: 'ドラゴンボール', imageDir: 'dragonball', boxMode: true },
+     // ↓ 新カテゴリを追加
+     yugioh:     { label: '遊戯王',         sheetName: '遊戯王',       imageDir: 'yugioh',    boxMode: true },
+   };
+   ```
+   - `boxMode: true` → 価格ラベルが「箱 / カートン」になる
+   - `boxMode` なし（省略） → 「シュリンクあり / シュリンクなし」になる
+
+3. **`index.html` のタブにカテゴリを追加**（Claude Code に依頼）
+   ```html
+   <button class="tab-btn" data-cat="yugioh">遊戯王</button>
+   ```
+
+4. **画像フォルダを作成し、画像をアップロード**
+   - `images/yugioh/` フォルダを作成（GitHub Web UI で空ファイルを置くか、Claude Code に依頼）
+   - 商品画像を `images/yugioh/` にアップロード
+
+5. **manifest.json を更新**（Claude Code に依頼、または `node scripts/update-manifest.mjs`）
+
+6. **カテゴリ別ラベル仕様表を CLAUDE.md に追記**（このファイルの「カテゴリ別ラベル仕様」を更新）
+
+---
+
 ## 買取ルール（表示内容の根拠）
 
 ### 本人確認書類
@@ -199,3 +270,10 @@ Claude Code 起動時に自動で読み込まれるファイルです。
 | 依頼 | 対応ファイル | 変更内容 |
 |------|-------------|---------|
 | 申込完了後に「次にやること」3ステップを追加 | `index.html` `style.css` | 本人確認・発送・追跡番号連絡の3ステップを見積書の前に番号付きで表示。eKYCボタンをStep1内に統合し、下部の独立eKYCセクションを廃止 |
+
+### 2026-02-24（本セッション）
+
+| 依頼 | 対応ファイル | 変更内容 |
+|------|-------------|---------|
+| BASE-01・OPD-2025 の画像を追加 | `images/onepiece/` `images/manifest.json` | GitHubからcherry-pickしてmanifest.jsonに反映 |
+| 商品・カテゴリ追加手順を記録 | `CLAUDE.md` | 既存カテゴリへの商品追加手順（A）・新カテゴリ追加手順（B）を追記 |
