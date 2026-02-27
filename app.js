@@ -40,6 +40,7 @@ const CATEGORIES = {
   pokemon: { label: 'ポケモンカード', sheetName: 'ポケモン', imageDir: 'pokemon' },
   onepiece: { label: 'ONE PIECE', sheetName: 'ワンピース', imageDir: 'onepiece', boxMode: true },
   dragonball: { label: 'ドラゴンボール', sheetName: 'ドラゴンボール', imageDir: 'dragonball', boxMode: true },
+  yugioh: { label: '遊戯王', sheetName: '遊戯王', imageDir: 'yugioh', boxMode: true },
 };
 
 function getCatLabels(categoryKey) {
@@ -498,20 +499,23 @@ async function loadAllData() {
 
   try {
     await loadImageManifest();
-    const [p, o, d] = await Promise.all([
+    const [p, o, d, y] = await Promise.all([
       loadCategory('pokemon'),
       loadCategory('onepiece'),
       loadCategory('dragonball'),
+      loadCategory('yugioh'),
     ]);
 
     allData.pokemon = { items: p.items, notices: p.notices };
     allData.onepiece = { items: o.items, notices: o.notices };
     allData.dragonball = { items: d.items, notices: d.notices };
+    allData.yugioh = { items: y.items, notices: y.notices };
 
     const updated =
       extractUpdatedAt(p.gviz?.table?.rows || []) ||
       extractUpdatedAt(o.gviz?.table?.rows || []) ||
-      extractUpdatedAt(d.gviz?.table?.rows || []);
+      extractUpdatedAt(d.gviz?.table?.rows || []) ||
+      extractUpdatedAt(y.gviz?.table?.rows || []);
 
     els.updatedAt.textContent = updated || '—';
 
