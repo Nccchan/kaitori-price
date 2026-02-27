@@ -1226,11 +1226,7 @@ function showBlacklistModal() {
   const box = document.createElement('div');
   box.style.cssText = 'background:#fff;border-radius:12px;padding:28px 24px;max-width:400px;width:100%;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.2)';
   box.innerHTML = `
-    <div style="font-size:2rem;margin-bottom:12px">🚫</div>
-    <h3 style="margin:0 0 12px;font-size:1.1rem;color:#c00">現在、お取引をお断りしております</h3>
-    <p style="margin:0 0 20px;font-size:0.9rem;line-height:1.6;color:#444">
-      別のお名前・電話番号でのお申し込みは不正行為とみなされ、<strong>荷物の受け取りを拒否する場合があります</strong>のでご了承ください。
-    </p>
+    <p style="margin:0 0 20px;font-size:1rem;color:#333">お取引をお断りしております</p>
     <button style="background:#333;color:#fff;border:none;border-radius:8px;padding:10px 32px;font-size:1rem;cursor:pointer">閉じる</button>
   `;
   box.querySelector('button').onclick = () => {
