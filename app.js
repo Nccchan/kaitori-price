@@ -1035,6 +1035,14 @@ function closeCheckoutModal() {
   setModalOpen(false);
 }
 
+// 口座名義チェック用：スペース除去・ひらがな→カタカナ・英字大文字化
+function normalizeKana(s) {
+  return s
+    .replace(/[\s　]/g, '')
+    .replace(/[ぁ-ん]/g, c => String.fromCharCode(c.charCodeAt(0) + 0x60))
+    .toUpperCase();
+}
+
 function openTermsModal() {
   // バリデーションを先に実行（エラーがあれば利用規約を開かない）
   const errEl = document.getElementById('checkoutError');
@@ -1070,6 +1078,11 @@ function openTermsModal() {
   if (!bankType) errors.push('口座種別を選択してください');
   if (!bankNumber) errors.push('口座番号を入力してください');
   if (!bankHolder) errors.push('口座名義を入力してください');
+  if (lastKana && firstKana && bankHolder) {
+    if (normalizeKana(lastKana + firstKana) !== normalizeKana(bankHolder)) {
+      errors.push('口座名義と申請者のフリガナが一致しません。古物営業法により、申請者本人名義の口座のみ受け付けております。本人名義の口座をご入力いただくか、フリガナをご確認ください。');
+    }
+  }
   if (errors.length > 0) {
     if (errEl) { errEl.textContent = errors.join('\n'); errEl.hidden = false; }
     return;
@@ -1221,6 +1234,11 @@ async function submitCheckout() {
     if (!bankType) errors.push('口座種別を選択してください');
     if (!bankNumber) errors.push('口座番号を入力してください');
     if (!bankHolder) errors.push('口座名義を入力してください');
+    if (lastKana && firstKana && bankHolder) {
+      if (normalizeKana(lastKana + firstKana) !== normalizeKana(bankHolder)) {
+        errors.push('口座名義と申請者のフリガナが一致しません。古物営業法により、申請者本人名義の口座のみ受け付けております。本人名義の口座をご入力いただくか、フリガナをご確認ください。');
+      }
+    }
 
     if (errors.length > 0) {
       if (errEl) { errEl.textContent = errors.join('\n'); errEl.hidden = false; }
