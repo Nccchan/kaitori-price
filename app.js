@@ -499,20 +499,23 @@ async function loadAllData() {
 
   try {
     await loadImageManifest();
-    const [p, o, d] = await Promise.all([
+    const [p, o, d, y] = await Promise.all([
       loadCategory('pokemon'),
       loadCategory('onepiece'),
       loadCategory('dragonball'),
+      loadCategory('yugioh'),
     ]);
 
     allData.pokemon = { items: p.items, notices: p.notices };
     allData.onepiece = { items: o.items, notices: o.notices };
     allData.dragonball = { items: d.items, notices: d.notices };
+    allData.yugioh = { items: y.items, notices: y.notices };
 
     const updated =
       extractUpdatedAt(p.gviz?.table?.rows || []) ||
       extractUpdatedAt(o.gviz?.table?.rows || []) ||
-      extractUpdatedAt(d.gviz?.table?.rows || []);
+      extractUpdatedAt(d.gviz?.table?.rows || []) ||
+      extractUpdatedAt(y.gviz?.table?.rows || []);
 
     els.updatedAt.textContent = updated || '—';
 
@@ -1213,8 +1216,8 @@ async function submitCheckout() {
       saveMemberToStorage(lastName, firstName, tel, email, bankName, bankBranch, bankType, bankNumber, bankHolder);
       const snapshot = cart.map(c => ({ ...c }));
       clearCart();
-      renderReceipt(snapshot, data);
-      const receptionId = data?.reception_id || data?.offer_id || data?.id || '';
+      const receptionId = generateReceiptId();
+      renderReceipt(snapshot, receptionId);
       sendReceiptEmail(email, `${lastName} ${firstName}`, receptionId, snapshot);
       const form = document.getElementById('checkoutForm');
       const done = document.getElementById('checkoutDone');
@@ -1256,11 +1259,16 @@ function showBlacklistModal() {
   setModalOpen(true);
 }
 
-function renderReceipt(snapshot, apiData) {
-  // 受付ID（Recore接続後はapiDataから取得、それまでは非表示）
-  const receptionId = apiData?.reception_id || apiData?.offer_id || apiData?.id || null;
+function generateReceiptId() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ0123456789'; // O・I除外
+  let id = '';
+  for (let i = 0; i < 6; i++) id += chars[Math.floor(Math.random() * chars.length)];
+  return id;
+}
+
+function renderReceipt(snapshot, receptionId) {
   document.querySelectorAll('#receiptId, .receipt__id-inline').forEach(el => {
-    el.textContent = receptionId || '（LINEにてお送りします）';
+    el.textContent = receptionId;
   });
 
   // 商品行
