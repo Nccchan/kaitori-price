@@ -71,9 +71,66 @@ Claude Code 起動時に自動で読み込まれるファイルです。
 - 認証: `X-Identification` ヘッダ（Vercel環境変数 `RECORE_API_KEY`）
 - **APIキー未設定のため現在は接続不可** → Vercel環境変数 `RECORE_API_KEY` に設定が必要
 - フロントエンドは直接Recoreを呼ばず、`/api/submit-offer.js` を経由する（セキュリティ対策）
-- カート内容は `comment` フィールドにテキスト形式で送信（商品名・数量・単価・合計）
+- カート内容は `offer_comment` フィールドにテキスト形式で送信（商品名・数量・単価・合計）
 - `is_pickup: false`（ヤマト自動集荷なし）
 - `message_channel: 'LINE'`（LINE通知）
+
+#### Recore API 正式フィールド仕様（仕様書より）
+仕様書URL: https://novasto.github.io/ReCORE.co-api/spec/bad_case.html
+
+| フィールド | 型 | 制約 | 備考 |
+|-----------|-----|------|------|
+| last_name / first_name | string | 50文字 | 姓・名 |
+| last_kana / first_kana | string | 50文字 | セイ・メイ |
+| sex | string | MALE/FEMALE/OTHER | 性別 |
+| birthdate | string | YYYY-MM-DD | **`birthday`ではなく`birthdate`** |
+| tel | string | ハイフンあり・なし両方可 | `/^0[0-9]{9,10}$/` または `-`区切り形式 |
+| email | string | 256文字 | メール |
+| postal_code | string | `^[0-9]{3}-?[0-9]{4}$` | 郵便番号 |
+| prefecture | string | 10文字 | 都道府県 |
+| address1 | string | — | 市区町村 |
+| address2 | string | — | 番地・建物名（任意） |
+| message_channel | string | EMAIL/SMS/LINE | 希望連絡方法 |
+| offer_comment | string | — | 申込時備考（**`comment`ではなく`offer_comment`**） |
+| bank_code | string | **4桁数値のみ** | 銀行コード（銀行名ではなくコード） |
+| bank_branch_code | string | **3桁数値のみ** | 支店コード（支店名ではなくコード） |
+| bank_account_number | string | **7桁数値のみ** | 口座番号 |
+| bank_account_name | string | 30文字・カタカナ等 | 口座名義 |
+| member_jwt | string | — | LINEミニアプリJWT |
+
+**⚠️ 現在のコードとの差異（要修正）:**
+1. `comment` → `offer_comment` に変更が必要
+2. `birthday` → `birthdate` に変更が必要
+3. 銀行情報: APIは**名称ではなくコード（数値）**を要求する
+   - `bank_name`（銀行名）→ `bank_code`（4桁）に変更が必要
+   - `bank_branch_name`（支店名）→ `bank_branch_code`（3桁）に変更が必要
+   - **銀行コードを入力させるUXは難しいため、GMO銀行振込APIかeKYCで対応するのが現実的**
+
+### eKYC連携（未導入）
+仕様書URL: https://docs.channel.io/helprecore/ja/articles/r0727-f2c89fac
+
+- **費用**: 月額5,500円（税込）＋ 1件あたり330円（税込）
+- **メリット**: 本人限定郵便・配送会社経由の本人確認が不要になる
+- **デメリット**: 件数課金あり
+- **申請**: ロゴ画像（横5:縦1・50KB以下）を用意してGoogleフォームから申請 → 約10営業日で利用開始
+- **銀行情報との関係**: eKYCは本人確認のみ。銀行口座確認には別途GMO銀行振込APIが必要
+- **注意**: 一部スマートフォンでeKYCが起動しない事象あり（担当営業に確認）
+
+### 宅配買取導入フロー（全8ステップ）
+仕様書URL: https://docs.channel.io/helprecore/ja/articles/宅配買取導入ドキュメント--ユーザーヘルプサイト-5530f29f
+
+| ステップ | 内容 | 当サービス状況 |
+|---------|------|-------------|
+| STEP1 | サービス設計（事前査定・集荷体制・本人確認方式） | 完了 |
+| STEP2 | 要件確定（フォーム・マイページ・eKYC・ヤマト連携等） | 進行中 |
+| STEP3 | LINEミニアプリ申請 | **申請中** |
+| STEP4 | ヤマト自動集荷連携 | 未対応（`is_pickup: false`） |
+| STEP5 | eKYC連携 | 未対応 |
+| STEP6 | 申込フォーム作成 | 完了 |
+| STEP7 | 申込フォーム実装（LP公開） | 完了（Vercel） |
+| STEP8 | 操作手順・オペレーション確認 | 未実施 |
+
+**GMO銀行振込API**: 銀行コードで口座確認するAPI。銀行フォームの代替として検討が必要。
 
 ### LINE ミニアプリ連携（申請中）
 - コードは実装済み（`recore.member.message('member')` で会員情報自動入力）
@@ -221,10 +278,14 @@ Claude Code 起動時に自動で読み込まれるファイルです。
 
 | 優先度 | タスク | 備考 |
 |--------|--------|------|
+| 最高 | `comment` → `offer_comment` に修正（APIフィールド名誤り） | `app.js` の payload と `buildCommentText` |
+| 最高 | `birthday` → `birthdate` に修正（APIフィールド名誤り） | `app.js` の payload・フォームID・バリデーション |
+| 高 | 銀行情報フォームの方針決定（銀行名ではなく銀行コードが必要） | 選択肢: ①GMO銀行振込API ②eKYC ③手入力でコード入力 |
+| 高 | RecoreのAPIキーを Vercel 環境変数 `RECORE_API_KEY` に設定 | 現在は申込が飛ばない状態 |
 | 高 | Recoreサポートに `MEMBER_APP_URL` を問い合わせる | LINEミニアプリ承認後に発行 |
-| 高 | RecoreのAPIキーを `app.js` の `RECORE_API_KEY` に設定 | 現在は申込が飛ばない状態 |
 | 中 | LINEミニアプリ承認後: `MEMBER_APP_URL` を設定し会員情報自動入力を有効化 | コード実装済み |
 | 中 | LINEミニアプリ承認後: Recore APIレスポンスの受付IDを完了画面に表示 | `renderReceipt()` で対応済み |
+| 中 | eKYC導入検討（月額5,500円＋330円/件） | 本人確認の簡略化が目的 |
 | 低 | AIチャットのQ&Aをさらに精緻化（LINEチャット履歴追加分析） | `training_data/` にCSVを追加後 `node scripts/analyze_line_chats.mjs` を実行 |
 
 ---
