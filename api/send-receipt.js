@@ -78,6 +78,15 @@ export default async function handler(req, res) {
               </tfoot>
             </table>
 
+            <!-- 発送先 -->
+            <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;padding:16px;font-size:13px;margin-bottom:16px;">
+              <div style="font-weight:700;margin-bottom:8px;">📦 発送先</div>
+              <div style="line-height:1.9;">
+                〒940-0878　新潟県長岡市笹崎1-8-22 1階<br>
+                株式会社AiGIVE　宛　TEL: 070-9126-7304
+              </div>
+            </div>
+
             <!-- 注意事項 -->
             <div style="background:#fefce8;border:1px solid #fde68a;border-radius:6px;padding:16px;font-size:13px;color:#78350f;">
               <div style="font-weight:600;margin-bottom:8px;">⚠️ 発送時のご注意</div>
