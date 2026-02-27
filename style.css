@@ -274,6 +274,8 @@ a{color:inherit}
 .receipt__totals{border-top:2px solid var(--line);padding-top:10px;margin-bottom:14px;display:grid;gap:4px}
 .receipt__total-row{display:flex;justify-content:space-between;font-size:13px;color:var(--muted)}
 .receipt__total-row--final{font-size:15px;font-weight:900;color:var(--text);border-top:1px solid var(--line);padding-top:6px;margin-top:4px}
+.receipt__address{background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:12px;margin-bottom:10px;font-size:13px;line-height:1.8}
+.receipt__address-label{font-weight:900;margin-bottom:4px}
 .receipt__notes{background:rgba(239,68,68,0.05);border:1px solid rgba(239,68,68,0.2);border-radius:10px;padding:12px}
 .receipt__notes-title{font-weight:900;font-size:13px;margin-bottom:6px}
 .receipt__notes-list{margin:0;padding:0 0 0 16px;display:grid;gap:5px}
