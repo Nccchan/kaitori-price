@@ -37,10 +37,10 @@ function clearSavedMemberAndForm() {
 }
 
 const CATEGORIES = {
-  pokemon: { label: 'ポケモンカード', sheetName: 'ポケモン', imageDir: 'pokemon' },
-  onepiece: { label: 'ONE PIECE', sheetName: 'ワンピース', imageDir: 'onepiece', boxMode: true },
-  dragonball: { label: 'ドラゴンボール', sheetName: 'ドラゴンボール', imageDir: 'dragonball', boxMode: true },
-  yugioh: { label: '遊戯王', sheetName: '遊戯王', imageDir: 'yugioh', boxMode: true },
+  pokemon:    { label: 'ポケモンカード',  sheetName: 'ポケモン',       imageDir: 'pokemon'    },
+  onepiece:   { label: 'ONE PIECE',      sheetName: 'ワンピース',     imageDir: 'onepiece',   boxMode: true },
+  dragonball: { label: 'ドラゴンボール',  sheetName: 'ドラゴンボール', imageDir: 'dragonball', boxMode: true },
+  yugioh:     { label: '遊戯王',         sheetName: '遊戯王',         imageDir: 'yugioh',     boxMode: true },
 };
 
 function getCatLabels(categoryKey) {
@@ -583,9 +583,18 @@ function wire() {
 
 // ===== CART SYSTEM =====
 
-// カート状態（localStorage永続化）
+// カート状態（localStorage永続化・30分で自動クリア）
+const CART_EXPIRY_MS = 30 * 60 * 1000;
 let cart = [];
-try { cart = JSON.parse(localStorage.getItem('kaitori_cart') || '[]'); } catch { cart = []; }
+try {
+  const ts = parseInt(localStorage.getItem('kaitori_cart_ts') || '0', 10);
+  if (ts && Date.now() - ts < CART_EXPIRY_MS) {
+    cart = JSON.parse(localStorage.getItem('kaitori_cart') || '[]');
+  } else {
+    localStorage.removeItem('kaitori_cart');
+    localStorage.removeItem('kaitori_cart_ts');
+  }
+} catch { cart = []; }
 
 // シュリンク選択の対象（選択ポップアップ表示中に保持）
 let _pendingItem = null;
@@ -594,7 +603,15 @@ let _pendingCategory = null;
 // -- カートデータ操作 --
 
 function saveCart() {
-  try { localStorage.setItem('kaitori_cart', JSON.stringify(cart)); } catch { /* ignore */ }
+  try {
+    if (cart.length > 0) {
+      localStorage.setItem('kaitori_cart', JSON.stringify(cart));
+      localStorage.setItem('kaitori_cart_ts', String(Date.now()));
+    } else {
+      localStorage.removeItem('kaitori_cart');
+      localStorage.removeItem('kaitori_cart_ts');
+    }
+  } catch { /* ignore */ }
 }
 
 function addToCart(item, categoryKey, shrinkType) {
