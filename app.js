@@ -13,9 +13,9 @@ const EKYC_URL = '';
 // ===== フロントエンド会員情報（localStorage）=====
 const MEMBER_STORAGE_KEY = 'nikoniko_member';
 
-function saveMemberToStorage(lastName, firstName, lastKana, firstKana, sex, tel, email, postalCode, prefecture, address1, address2, bankName, bankBranch, bankType, bankNumber, bankHolder) {
+function saveMemberToStorage(lastName, firstName, lastKana, firstKana, sex, birthday, tel, email, postalCode, prefecture, address1, address2, bankName, bankBranch, bankType, bankNumber, bankHolder) {
   try {
-    localStorage.setItem(MEMBER_STORAGE_KEY, JSON.stringify({ lastName, firstName, lastKana, firstKana, sex, tel, email, postalCode, prefecture, address1, address2, bankName, bankBranch, bankType, bankNumber, bankHolder }));
+    localStorage.setItem(MEMBER_STORAGE_KEY, JSON.stringify({ lastName, firstName, lastKana, firstKana, sex, birthday, tel, email, postalCode, prefecture, address1, address2, bankName, bankBranch, bankType, bankNumber, bankHolder }));
   } catch { /* ignore */ }
 }
 
@@ -28,7 +28,7 @@ function loadMemberFromStorage() {
 
 function clearSavedMemberAndForm() {
   try { localStorage.removeItem(MEMBER_STORAGE_KEY); } catch { /* ignore */ }
-  ['co_last_name', 'co_first_name', 'co_last_kana', 'co_first_kana', 'co_sex', 'co_tel', 'co_email', 'co_postal_code', 'co_prefecture', 'co_address1', 'co_address2', 'co_bank_name', 'co_bank_branch', 'co_bank_type', 'co_bank_number', 'co_bank_holder'].forEach(id => {
+  ['co_last_name', 'co_first_name', 'co_last_kana', 'co_first_kana', 'co_sex', 'co_birthday', 'co_tel', 'co_email', 'co_postal_code', 'co_prefecture', 'co_address1', 'co_address2', 'co_bank_name', 'co_bank_branch', 'co_bank_type', 'co_bank_number', 'co_bank_holder'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
@@ -1008,6 +1008,7 @@ function openCheckoutModal() {
     fill('co_last_kana', saved.lastKana);
     fill('co_first_kana', saved.firstKana);
     fill('co_sex', saved.sex);
+    fill('co_birthday', saved.birthday);
     fill('co_tel', saved.tel);
     fill('co_email', saved.email);
     fill('co_postal_code', saved.postalCode);
@@ -1042,6 +1043,7 @@ function openTermsModal() {
   const lastKana = (document.getElementById('co_last_kana')?.value || '').trim();
   const firstKana = (document.getElementById('co_first_kana')?.value || '').trim();
   const sex = (document.getElementById('co_sex')?.value || '').trim();
+  const birthday = (document.getElementById('co_birthday')?.value || '').trim();
   const tel = (document.getElementById('co_tel')?.value || '').trim();
   const postalCode = (document.getElementById('co_postal_code')?.value || '').trim();
   const prefecture = (document.getElementById('co_prefecture')?.value || '').trim();
@@ -1057,7 +1059,9 @@ function openTermsModal() {
   if (!lastKana) errors.push('フリガナ（姓）を入力してください');
   if (!firstKana) errors.push('フリガナ（名）を入力してください');
   if (!sex) errors.push('性別を選択してください');
+  if (!birthday) errors.push('生年月日を入力してください');
   if (!tel) errors.push('電話番号を入力してください');
+  if (tel && !/^0[0-9]{9,10}$/.test(tel)) errors.push('電話番号はハイフンなしの数字のみで入力してください');
   if (!postalCode) errors.push('郵便番号を入力してください');
   if (!prefecture) errors.push('都道府県を選択してください');
   if (!address1) errors.push('市区町村を入力してください');
@@ -1123,6 +1127,34 @@ async function sendReceiptEmail(email, name, receptionId, items) {
   } catch { /* メール送信失敗は無視（申込自体は成功済み） */ }
 }
 
+async function lookupPostalCode() {
+  const postalEl = document.getElementById('co_postal_code');
+  const btn = document.getElementById('postalLookupBtn');
+  const zip = (postalEl?.value || '').replace(/-/g, '').trim();
+  if (!/^\d{7}$/.test(zip)) {
+    alert('郵便番号を7桁の数字で入力してください');
+    return;
+  }
+  if (btn) { btn.disabled = true; btn.textContent = '検索中...'; }
+  try {
+    const res = await fetch(`https://zipcloud.ibsnet.co.jp/api/search?zipcode=${zip}`);
+    const data = await res.json();
+    if (data.results && data.results.length > 0) {
+      const r = data.results[0];
+      const prefSel = document.getElementById('co_prefecture');
+      if (prefSel) prefSel.value = r.address1;
+      const addr1El = document.getElementById('co_address1');
+      if (addr1El) addr1El.value = r.address2 + r.address3;
+    } else {
+      alert('該当する住所が見つかりませんでした。郵便番号をご確認ください。');
+    }
+  } catch {
+    alert('住所の取得に失敗しました。手動でご入力ください。');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '住所を自動入力'; }
+  }
+}
+
 async function submitCheckout() {
   const errEl = document.getElementById('checkoutError');
   const submitBtn = document.getElementById('checkoutSubmit');
@@ -1138,6 +1170,7 @@ async function submitCheckout() {
       ['co_postal_code', '9400878'], ['co_prefecture', '新潟県'],
       ['co_address1', '長岡市笹崎'], ['co_address2', '1-8-22'],
       ['co_bank_name', 'テスト銀行'], ['co_bank_branch', '本店'],
+      ['co_birthday', '1990-01-01'],
       ['co_bank_type', '普通'], ['co_bank_number', '1234567'],
       ['co_bank_holder', 'テスト タロウ'],
     ];
@@ -1152,6 +1185,7 @@ async function submitCheckout() {
   const lastKana = (document.getElementById('co_last_kana')?.value || '').trim();
   const firstKana = (document.getElementById('co_first_kana')?.value || '').trim();
   const sex = (document.getElementById('co_sex')?.value || '').trim();
+  const birthday = (document.getElementById('co_birthday')?.value || '').trim();
   let tel = (document.getElementById('co_tel')?.value || '').trim();
   const email = (document.getElementById('co_email')?.value || '').trim();
   const extraComment = (document.getElementById('co_comment')?.value || '').trim();
@@ -1173,10 +1207,11 @@ async function submitCheckout() {
     if (!lastKana) errors.push('フリガナ（姓）を入力してください');
     if (!firstKana) errors.push('フリガナ（名）を入力してください');
     if (!sex) errors.push('性別を選択してください');
+    if (!birthday) errors.push('生年月日を入力してください');
     if (!tel) {
       errors.push('電話番号を入力してください');
-    } else if (!/(?:^0[0-9]{9,10}$)|(?:^0[0-9]{1,3}-[0-9]{2,4}-[0-9]{3,4}$)/.test(tel)) {
-      errors.push('電話番号の形式が正しくありません');
+    } else if (!/^0[0-9]{9,10}$/.test(tel)) {
+      errors.push('電話番号はハイフンなしの数字のみで入力してください');
     }
     if (!postalCode) errors.push('郵便番号を入力してください');
     if (!prefecture) errors.push('都道府県を選択してください');
@@ -1214,10 +1249,17 @@ async function submitCheckout() {
     last_kana: lastKana,
     first_kana: firstKana,
     sex,
+    birthday,
     tel,
     postal_code: postalCode,
     prefecture,
     address1,
+    // 銀行情報（Recore API フィールド名は仕様書に従い要確認）
+    bank_name: bankName,
+    bank_branch_name: bankBranch,
+    bank_account_type: bankType,
+    bank_account_no: bankNumber,
+    bank_account_name: bankHolder,
     message_channel: 'LINE',
     comment,
   };
@@ -1230,7 +1272,7 @@ async function submitCheckout() {
     const snapshot = cart.map(c => ({ ...c }));
     clearCart();
     renderReceipt(snapshot, { reception_id: 'TEST01' });
-    saveMemberToStorage(lastName, firstName, lastKana, firstKana, sex, tel, email, postalCode, prefecture, address1, address2, bankName, bankBranch, bankType, bankNumber, bankHolder);
+    saveMemberToStorage(lastName, firstName, lastKana, firstKana, sex, birthday, tel, email, postalCode, prefecture, address1, address2, bankName, bankBranch, bankType, bankNumber, bankHolder);
     sendReceiptEmail(email, `${lastName} ${firstName}`, 'TEST01', snapshot);
     const form = document.getElementById('checkoutForm');
     const done = document.getElementById('checkoutDone');
@@ -1250,7 +1292,7 @@ async function submitCheckout() {
     const data = await res.json().catch(() => null);
 
     if (res.ok) {
-      saveMemberToStorage(lastName, firstName, lastKana, firstKana, sex, tel, email, postalCode, prefecture, address1, address2, bankName, bankBranch, bankType, bankNumber, bankHolder);
+      saveMemberToStorage(lastName, firstName, lastKana, firstKana, sex, birthday, tel, email, postalCode, prefecture, address1, address2, bankName, bankBranch, bankType, bankNumber, bankHolder);
       const snapshot = cart.map(c => ({ ...c }));
       clearCart();
       const receptionId = generateReceiptId();
@@ -1368,6 +1410,12 @@ function wireCart() {
   document.getElementById('checkoutModalClose')?.addEventListener('click', closeCheckoutModal);
   document.getElementById('checkoutSubmit')?.addEventListener('click', openTermsModal);
   document.getElementById('savedMemberClear')?.addEventListener('click', clearSavedMemberAndForm);
+
+  // 郵便番号 → 住所自動入力
+  document.getElementById('postalLookupBtn')?.addEventListener('click', lookupPostalCode);
+  document.getElementById('co_postal_code')?.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); lookupPostalCode(); }
+  });
   document.getElementById('termsModalBd')?.addEventListener('click', closeTermsModal);
   document.getElementById('termsModalClose')?.addEventListener('click', closeTermsModal);
   document.getElementById('termsDeclineBtn')?.addEventListener('click', closeTermsModal);
