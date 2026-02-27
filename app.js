@@ -1202,6 +1202,9 @@ async function submitCheckout() {
       const done = document.getElementById('checkoutDone');
       if (form) form.hidden = true;
       if (done) done.hidden = false;
+    } else if (res.status === 403 && data?.code === 'BLACKLISTED') {
+      showBlacklistModal();
+      if (submitBtn) submitBtn.disabled = false;
     } else {
       const msg = data?.error?.message || `エラーが発生しました (${res.status})`;
       if (errEl) { errEl.textContent = msg; errEl.hidden = false; }
@@ -1214,6 +1217,29 @@ async function submitCheckout() {
     }
     if (submitBtn) submitBtn.disabled = false;
   }
+}
+
+function showBlacklistModal() {
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px';
+
+  const box = document.createElement('div');
+  box.style.cssText = 'background:#fff;border-radius:12px;padding:28px 24px;max-width:400px;width:100%;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.2)';
+  box.innerHTML = `
+    <div style="font-size:2rem;margin-bottom:12px">🚫</div>
+    <h3 style="margin:0 0 12px;font-size:1.1rem;color:#c00">現在、お取引をお断りしております</h3>
+    <p style="margin:0 0 20px;font-size:0.9rem;line-height:1.6;color:#444">
+      別のお名前・電話番号でのお申し込みは不正行為とみなされ、<strong>荷物の受け取りを拒否する場合があります</strong>のでご了承ください。
+    </p>
+    <button style="background:#333;color:#fff;border:none;border-radius:8px;padding:10px 32px;font-size:1rem;cursor:pointer">閉じる</button>
+  `;
+  box.querySelector('button').onclick = () => {
+    document.body.removeChild(overlay);
+    setModalOpen(false);
+  };
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+  setModalOpen(true);
 }
 
 function renderReceipt(snapshot, apiData) {
