@@ -1171,7 +1171,7 @@ function startModification() {
 
   // カートを申込時の内容に戻す
   cart = data.cartSnapshot.map(c => ({ ...c }));
-  renderCartCount();
+  updateCartBadge();
 
   openCheckoutModal();
 
