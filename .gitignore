@@ -9,6 +9,8 @@ yarn-error.log*
 pnpm-debug.log*
 
 .env
+*.env.txt
+API.env.txt
 
 # LINE学習データ（個人情報含む可能性があるためgit管理外）
 training_data/*.csv
