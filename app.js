@@ -10,6 +10,10 @@ const MEMBER_APP_URL = '';
 // eKYC 本人確認URL（承認後に設定してください。空文字のままだと完了画面に表示されません）
 const EKYC_URL = '';
 
+// LINE 公式アカウントURL（例: https://line.me/R/oaMessage/@XXXXXXXX/ ）
+// 設定するとキャンセル・変更案内のLINEボタンが有効になります
+const LINE_CONTACT_URL = '';
+
 // ===== フロントエンド会員情報（localStorage）=====
 const MEMBER_STORAGE_KEY = 'nikoniko_member';
 
@@ -1056,6 +1060,11 @@ function closeCheckoutModal() {
   const el = document.getElementById('checkoutModal');
   if (el) el.hidden = true;
   setModalOpen(false);
+  // 変更モードでキャンセルした場合はバナーを再表示
+  if (_modificationMode) {
+    _modificationMode = false;
+    checkModificationWindow();
+  }
 }
 
 // ===== 変更モード状態 =====
@@ -1074,18 +1083,27 @@ function checkModificationWindow() {
   showModificationBanner(data);
 }
 
+function buildLineContactUrl(caseCode) {
+  if (!LINE_CONTACT_URL) return '';
+  const msg = `申込番号「${caseCode}」の内容を変更したいです`;
+  const sep = LINE_CONTACT_URL.includes('?') ? '&' : '?';
+  return LINE_CONTACT_URL + sep + 'text=' + encodeURIComponent(msg);
+}
+
 function showModificationBanner(data) {
   const banner = document.getElementById('modificationBanner');
   if (!banner) return;
   const codeEl = document.getElementById('modBannerCode');
   if (codeEl) codeEl.textContent = data.caseCode || '受付ID確認中';
+  banner.classList.remove('mod-banner--expired');
   banner.hidden = false;
   if (_modCountdownTimer) clearInterval(_modCountdownTimer);
   function tick() {
     const rem = MODIFICATION_WINDOW_MS - (Date.now() - data.submittedAt);
     if (rem <= 0) {
       clearPendingModification();
-      dismissModificationBanner();
+      if (_modCountdownTimer) { clearInterval(_modCountdownTimer); _modCountdownTimer = null; }
+      showLineExpiredBanner(data.caseCode);
       return;
     }
     const min = Math.floor(rem / 60000);
@@ -1095,6 +1113,26 @@ function showModificationBanner(data) {
   }
   tick();
   _modCountdownTimer = setInterval(tick, 1000);
+}
+
+function showLineExpiredBanner(caseCode) {
+  const banner = document.getElementById('modificationBanner');
+  if (!banner) return;
+  const lineUrl = buildLineContactUrl(caseCode);
+  const lineBtn = lineUrl
+    ? `<a class="mod-banner__btn" href="${lineUrl}" target="_blank" rel="noopener">LINEで連絡する</a>`
+    : '';
+  banner.innerHTML = `
+    <div class="mod-banner__body">
+      <span class="mod-banner__icon">⚠️</span>
+      <span class="mod-banner__text">発送前に変更が必要な場合は、受付ID <strong>${caseCode}</strong> を添えてLINEにご連絡ください</span>
+    </div>
+    <div class="mod-banner__actions">
+      ${lineBtn}
+      <button class="mod-banner__close" type="button" onclick="dismissModificationBanner()" aria-label="閉じる">×</button>
+    </div>`;
+  banner.classList.add('mod-banner--expired');
+  banner.hidden = false;
 }
 
 function dismissModificationBanner() {
@@ -1108,12 +1146,16 @@ function startModification() {
   if (!data) return;
   if (Date.now() - data.submittedAt > MODIFICATION_WINDOW_MS) {
     clearPendingModification();
-    dismissModificationBanner();
-    alert('変更可能な時間（30分）を過ぎました。');
+    showLineExpiredBanner(data.caseCode);
     return;
   }
   _modificationMode = true;
   _pendingModData = data;
+
+  // バナーを閉じてからモーダルを開く
+  const banner = document.getElementById('modificationBanner');
+  if (banner) banner.hidden = true;
+  if (_modCountdownTimer) { clearInterval(_modCountdownTimer); _modCountdownTimer = null; }
 
   // カートを申込時の内容に戻す
   cart = data.cartSnapshot.map(c => ({ ...c }));
