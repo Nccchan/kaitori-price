@@ -1269,7 +1269,22 @@ function renderCheckoutPreview() {
   const el = document.getElementById('checkoutCartPreview');
   if (!el) return;
   el.innerHTML = '';
-  if (cart.length === 0) return;
+
+  const submitBtn = document.getElementById('checkoutSubmit');
+
+  if (cart.length === 0) {
+    const wrap = document.createElement('div');
+    wrap.className = 'checkout-preview';
+    const empty = document.createElement('div');
+    empty.className = 'checkout-preview__empty';
+    empty.textContent = 'カートに商品がありません';
+    wrap.appendChild(empty);
+    el.appendChild(wrap);
+    if (submitBtn) submitBtn.disabled = true;
+    return;
+  }
+
+  if (submitBtn) submitBtn.disabled = false;
 
   const wrap = document.createElement('div');
   wrap.className = 'checkout-preview';
@@ -1279,13 +1294,62 @@ function renderCheckoutPreview() {
   title.textContent = '申込商品';
   wrap.appendChild(title);
 
-  for (const item of cart) {
+  cart.forEach((item, idx) => {
     const row = document.createElement('div');
     row.className = 'checkout-preview__item';
-    const subtotal = item.price * item.quantity;
-    row.textContent = `${item.name}${item.model ? ` (${item.model})` : ''} ${item.shrinkLabel} × ${item.quantity}点  ¥${subtotal.toLocaleString()}`;
+
+    const info = document.createElement('span');
+    info.className = 'checkout-preview__item-info';
+    info.textContent = `${item.name}${item.model ? ` (${item.model})` : ''} ${item.shrinkLabel}`;
+
+    const controls = document.createElement('span');
+    controls.className = 'checkout-preview__controls';
+
+    const minus = document.createElement('button');
+    minus.type = 'button';
+    minus.className = 'preview-qty-btn';
+    minus.textContent = '−';
+    minus.addEventListener('click', () => {
+      if (cart[idx].quantity > 1) { cart[idx].quantity--; } else { cart.splice(idx, 1); }
+      saveCart(); updateCartBadge(); renderCheckoutPreview();
+    });
+
+    const qtyEl = document.createElement('span');
+    qtyEl.className = 'preview-qty-num';
+    qtyEl.textContent = `${item.quantity}点`;
+
+    const plus = document.createElement('button');
+    plus.type = 'button';
+    plus.className = 'preview-qty-btn';
+    plus.textContent = '+';
+    plus.addEventListener('click', () => {
+      cart[idx].quantity++;
+      saveCart(); updateCartBadge(); renderCheckoutPreview();
+    });
+
+    const del = document.createElement('button');
+    del.type = 'button';
+    del.className = 'preview-del-btn';
+    del.textContent = '×';
+    del.addEventListener('click', () => {
+      cart.splice(idx, 1);
+      saveCart(); updateCartBadge(); renderCheckoutPreview();
+    });
+
+    controls.appendChild(minus);
+    controls.appendChild(qtyEl);
+    controls.appendChild(plus);
+    controls.appendChild(del);
+
+    const price = document.createElement('span');
+    price.className = 'checkout-preview__item-price';
+    price.textContent = `¥${(item.price * item.quantity).toLocaleString()}`;
+
+    row.appendChild(info);
+    row.appendChild(controls);
+    row.appendChild(price);
     wrap.appendChild(row);
-  }
+  });
 
   const { count, amount } = getCartSummary();
   const total = document.createElement('div');
