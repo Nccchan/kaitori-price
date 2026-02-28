@@ -487,3 +487,11 @@ html.is-modal-open,body.is-modal-open{overflow:hidden}
 
 /* 変更申請通知（フォーム内） */
 .modification-notice{background:#fef9c3;border:1px solid #fbbf24;border-radius:var(--radius);padding:10px 14px;font-size:13px;color:#78350f;font-weight:600;margin-bottom:12px}
+
+/* 変更バナー：タイマー切れ後（LINE連絡モード） */
+.mod-banner--expired{background:#fff3cd;border-bottom-color:#f59e0b}
+.mod-banner--expired .mod-banner__text{color:#92400e}
+
+/* 利用規約モーダル：キャンセルポリシーサマリー */
+.terms-modal__policy{background:#fef9c3;border-top:1px solid #fbbf24;padding:10px 16px}
+.terms-modal__policy-list{margin:0;padding-left:18px;font-size:13px;color:#78350f;line-height:1.8}
