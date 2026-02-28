@@ -13,6 +13,29 @@ const EKYC_URL = '';
 // ===== フロントエンド会員情報（localStorage）=====
 const MEMBER_STORAGE_KEY = 'nikoniko_member';
 
+// ===== 申込変更（30分以内）=====
+const MODIFICATION_STORAGE_KEY = 'nikoniko_pending_mod';
+const MODIFICATION_WINDOW_MS = 30 * 60 * 1000; // 30分
+
+function savePendingModification(caseId, caseCode, cartSnapshot, formData) {
+  try {
+    localStorage.setItem(MODIFICATION_STORAGE_KEY, JSON.stringify(
+      { caseId, caseCode, submittedAt: Date.now(), cartSnapshot, formData }
+    ));
+  } catch { /* ignore */ }
+}
+
+function loadPendingModification() {
+  try {
+    const raw = localStorage.getItem(MODIFICATION_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch { return null; }
+}
+
+function clearPendingModification() {
+  try { localStorage.removeItem(MODIFICATION_STORAGE_KEY); } catch { /* ignore */ }
+}
+
 function saveMemberToStorage(lastName, firstName, lastKana, firstKana, sex, birthday, tel, email, postalCode, prefecture, address1, address2, bankName, bankBranch, bankType, bankNumber, bankHolder) {
   try {
     localStorage.setItem(MEMBER_STORAGE_KEY, JSON.stringify({ lastName, firstName, lastKana, firstKana, sex, birthday, tel, email, postalCode, prefecture, address1, address2, bankName, bankBranch, bankType, bankNumber, bankHolder }));
@@ -1035,6 +1058,96 @@ function closeCheckoutModal() {
   setModalOpen(false);
 }
 
+// ===== 変更モード状態 =====
+let _modificationMode = false;
+let _pendingModData = null;
+let _modCountdownTimer = null;
+
+function checkModificationWindow() {
+  const data = loadPendingModification();
+  if (!data) return;
+  if (Date.now() - data.submittedAt > MODIFICATION_WINDOW_MS) {
+    clearPendingModification();
+    return;
+  }
+  _pendingModData = data;
+  showModificationBanner(data);
+}
+
+function showModificationBanner(data) {
+  const banner = document.getElementById('modificationBanner');
+  if (!banner) return;
+  const codeEl = document.getElementById('modBannerCode');
+  if (codeEl) codeEl.textContent = data.caseCode || '受付ID確認中';
+  banner.hidden = false;
+  if (_modCountdownTimer) clearInterval(_modCountdownTimer);
+  function tick() {
+    const rem = MODIFICATION_WINDOW_MS - (Date.now() - data.submittedAt);
+    if (rem <= 0) {
+      clearPendingModification();
+      dismissModificationBanner();
+      return;
+    }
+    const min = Math.floor(rem / 60000);
+    const sec = Math.floor((rem % 60000) / 1000);
+    const timerEl = document.getElementById('modBannerTimer');
+    if (timerEl) timerEl.textContent = `残り ${min}分${sec.toString().padStart(2, '0')}秒`;
+  }
+  tick();
+  _modCountdownTimer = setInterval(tick, 1000);
+}
+
+function dismissModificationBanner() {
+  const banner = document.getElementById('modificationBanner');
+  if (banner) banner.hidden = true;
+  if (_modCountdownTimer) { clearInterval(_modCountdownTimer); _modCountdownTimer = null; }
+}
+
+function startModification() {
+  const data = _pendingModData || loadPendingModification();
+  if (!data) return;
+  if (Date.now() - data.submittedAt > MODIFICATION_WINDOW_MS) {
+    clearPendingModification();
+    dismissModificationBanner();
+    alert('変更可能な時間（30分）を過ぎました。');
+    return;
+  }
+  _modificationMode = true;
+  _pendingModData = data;
+
+  // カートを申込時の内容に戻す
+  cart = data.cartSnapshot.map(c => ({ ...c }));
+  renderCartCount();
+
+  openCheckoutModal();
+
+  // フォームを申込時の内容で復元してから変更モードUIに変更
+  setTimeout(() => {
+    const fd = data.formData;
+    const fill = (id, v) => { const el = document.getElementById(id); if (el && v != null) el.value = v; };
+    fill('co_last_name', fd.lastName);     fill('co_first_name', fd.firstName);
+    fill('co_last_kana', fd.lastKana);     fill('co_first_kana', fd.firstKana);
+    fill('co_sex', fd.sex);               fill('co_birthday', fd.birthday);
+    fill('co_tel', fd.tel);               fill('co_email', fd.email);
+    fill('co_postal_code', fd.postalCode); fill('co_prefecture', fd.prefecture);
+    fill('co_address1', fd.address1);     fill('co_address2', fd.address2);
+    fill('co_bank_name', fd.bankName);    fill('co_bank_branch', fd.bankBranch);
+    fill('co_bank_type', fd.bankType);    fill('co_bank_number', fd.bankNumber);
+    fill('co_bank_holder', fd.bankHolder);
+
+    const title = document.querySelector('.checkout-modal__title');
+    if (title) title.textContent = '申込内容の変更';
+    const submitBtn = document.getElementById('checkoutSubmit');
+    if (submitBtn) submitBtn.textContent = '変更を確定する';
+    const notice = document.getElementById('modificationNotice');
+    if (notice) {
+      notice.textContent = `受付ID「${data.caseCode}」の変更です。カートや内容を修正して「変更を確定する」を押してください。`;
+      notice.hidden = false;
+    }
+    renderCheckoutPreview();
+  }, 100);
+}
+
 // 口座名義チェック用：スペース除去・ひらがな→カタカナ・英字大文字化
 function normalizeKana(s) {
   return s
@@ -1285,13 +1398,26 @@ async function submitCheckout() {
   if (email) payload.email = email;
   if (_memberJwt) payload.member_jwt = _memberJwt;
 
+  const formDataSnapshot = { lastName, firstName, lastKana, firstKana, sex, birthday, tel, email, postalCode, prefecture, address1, address2, bankName, bankBranch, bankType, bankNumber, bankHolder };
+
   // テストモード（?testMode=1）：APIをスキップして完了画面を表示
   if (isTestMode) {
     const snapshot = cart.map(c => ({ ...c }));
     clearCart();
-    renderReceipt(snapshot, { reception_id: 'TEST01' });
+    const receiptLabel = _modificationMode ? `TEST01（変更）` : 'TEST01';
+    renderReceipt(snapshot, receiptLabel);
     saveMemberToStorage(lastName, firstName, lastKana, firstKana, sex, birthday, tel, email, postalCode, prefecture, address1, address2, bankName, bankBranch, bankType, bankNumber, bankHolder);
-    sendReceiptEmail(email, `${lastName} ${firstName}`, 'TEST01', snapshot);
+    sendReceiptEmail(email, `${lastName} ${firstName}`, receiptLabel, snapshot);
+    if (_modificationMode) {
+      clearPendingModification();
+      dismissModificationBanner();
+      _modificationMode = false; _pendingModData = null;
+    } else {
+      savePendingModification(null, 'TEST01', snapshot, formDataSnapshot);
+      dismissModificationBanner();
+      checkModificationWindow();
+    }
+    resetCheckoutModalUI();
     const form = document.getElementById('checkoutForm');
     const done = document.getElementById('checkoutDone');
     if (form) form.hidden = true;
@@ -1301,21 +1427,62 @@ async function submitCheckout() {
 
   // Recore API 送信（/api/submit-offer 経由でAPIキーをサーバーサイドに保管）
   try {
-    const res = await fetch('/api/submit-offer', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
+    let res;
+    const snapshot = cart.map(c => ({ ...c }));
+
+    if (_modificationMode && _pendingModData?.caseId) {
+      // PUT で変更を試みる
+      res = await fetch('/api/update-offer', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ case_id: _pendingModData.caseId, ...payload }),
+      });
+      if (!res.ok) {
+        // ステータスが進んでいる場合は新規ケースとして追加（comment に元受付IDを記録）
+        const refComment = `【変更申請・元受付ID: ${_pendingModData.caseCode}】\n${comment}`;
+        res = await fetch('/api/submit-offer', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...payload, comment: refComment }),
+        });
+      }
+    } else if (_modificationMode) {
+      // case_id 不明（APIキー未設定時など）→ 新規ケースに元受付IDを記録
+      const refComment = _pendingModData?.caseCode
+        ? `【追加申請・元受付ID: ${_pendingModData.caseCode}】\n${comment}`
+        : comment;
+      res = await fetch('/api/submit-offer', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...payload, comment: refComment }),
+      });
+    } else {
+      res = await fetch('/api/submit-offer', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+    }
 
     const data = await res.json().catch(() => null);
 
     if (res.ok) {
       saveMemberToStorage(lastName, firstName, lastKana, firstKana, sex, birthday, tel, email, postalCode, prefecture, address1, address2, bankName, bankBranch, bankType, bankNumber, bankHolder);
-      const snapshot = cart.map(c => ({ ...c }));
       clearCart();
-      const receptionId = generateReceiptId();
-      renderReceipt(snapshot, receptionId);
-      sendReceiptEmail(email, `${lastName} ${firstName}`, receptionId, snapshot);
+      const caseId = data?.id || null;
+      const caseCode = data?.code || generateReceiptId();
+      renderReceipt(snapshot, caseCode);
+      sendReceiptEmail(email, `${lastName} ${firstName}`, caseCode, snapshot);
+      if (_modificationMode) {
+        clearPendingModification();
+        dismissModificationBanner();
+        _modificationMode = false; _pendingModData = null;
+      } else {
+        savePendingModification(caseId, caseCode, snapshot, formDataSnapshot);
+        dismissModificationBanner();
+        checkModificationWindow();
+      }
+      resetCheckoutModalUI();
       const form = document.getElementById('checkoutForm');
       const done = document.getElementById('checkoutDone');
       if (form) form.hidden = true;
@@ -1618,3 +1785,16 @@ if (new URLSearchParams(location.search).get('testMode') === '1') {
   const banner = document.getElementById('testModeBanner');
   if (banner) banner.hidden = false;
 }
+
+// チェックアウトモーダルのタイトル・ボタンを通常表示に戻す
+function resetCheckoutModalUI() {
+  const title = document.querySelector('.checkout-modal__title');
+  if (title) title.textContent = '買取申込フォーム';
+  const submitBtn = document.getElementById('checkoutSubmit');
+  if (submitBtn) submitBtn.textContent = '利用規約に同意して申し込む';
+  const notice = document.getElementById('modificationNotice');
+  if (notice) notice.hidden = true;
+}
+
+// 変更ウィンドウの確認（ページ読み込み時）
+checkModificationWindow();

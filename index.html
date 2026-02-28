@@ -41,6 +41,18 @@
     🧪 テストモード：申込はAPIに送信されません
   </div>
 
+  <div id="modificationBanner" class="mod-banner" hidden>
+    <div class="mod-banner__body">
+      <span class="mod-banner__icon">✏️</span>
+      <span class="mod-banner__text">申込（受付ID: <strong id="modBannerCode"></strong>）を変更できます</span>
+      <span id="modBannerTimer" class="mod-banner__timer"></span>
+    </div>
+    <div class="mod-banner__actions">
+      <button class="mod-banner__btn" type="button" onclick="startModification()">変更する</button>
+      <button class="mod-banner__close" type="button" onclick="dismissModificationBanner()" aria-label="閉じる">×</button>
+    </div>
+  </div>
+
   <nav class="tabs" aria-label="カテゴリ">
     <div class="container tabs__inner">
       <button class="tab is-active" data-category="pokemon" type="button">⚡ ポケモンカード</button>
@@ -332,6 +344,8 @@
       <div class="checkout-modal__body">
         <div id="checkoutForm">
           <p class="checkout-modal__note">お名前と電話番号をご入力の上、申し込みボタンを押してください。</p>
+
+          <div id="modificationNotice" class="modification-notice" hidden></div>
 
           <div id="checkoutCartPreview"></div>
 
