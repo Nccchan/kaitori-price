@@ -504,6 +504,7 @@ async function loadImageManifest() {
         pokemon: json.pokemon || {},
         onepiece: json.onepiece || {},
         dragonball: json.dragonball || {},
+        yugioh: json.yugioh || {},
       };
     }
   } catch {
@@ -513,7 +514,14 @@ async function loadImageManifest() {
 
 async function loadCategory(key) {
   const sheetName = CATEGORIES[key].sheetName;
-  const res = await fetch(gvizUrl(sheetName), { cache: 'no-store' });
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 15000);
+  let res;
+  try {
+    res = await fetch(gvizUrl(sheetName), { cache: 'no-store', signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
   if (!res.ok) throw new Error(`fetch failed: ${res.status}`);
   const text = await res.text();
   const gviz = parseGviz(text);
