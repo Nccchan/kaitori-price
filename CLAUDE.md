@@ -132,6 +132,18 @@ Claude Code 起動時に自動で読み込まれるファイルです。
 
 **GMO銀行振込API**: 銀行コードで口座確認するAPI。銀行フォームの代替として検討が必要。
 
+### 申込後変更フロー（30分以内）
+- 申込完了後に `nikoniko_pending_mod`（localStorage）に `{ caseId, caseCode, submittedAt, cartSnapshot, formData }` を保存
+- ページ再訪問時に30分以内であれば黄色バナーを表示（カウントダウン付き）
+- 「変更する」→ カート・フォームを申込時の状態に復元してチェックアウトモーダルを変更モードで開く
+- 送信時の挙動:
+  - `caseId` あり → `PUT /api/update-offer` → Recore `PUT /bad_cases/{id}`
+  - Recoreステータスが進んでいた（PUTエラー）→ `POST /api/submit-offer`（コメントに元受付IDを記録）
+  - `caseId` なし（APIキー未設定時）→ 同上フォールバック
+- 変更確定後はlocalStorageクリア・バナー消去
+- 30分超過でも自動クリア
+- 関連ファイル: `api/update-offer.js`（新規）、`app.js`（`savePendingModification`・`checkModificationWindow`・`startModification` 等）
+
 ### LINE ミニアプリ連携（申請中）
 - コードは実装済み（`recore.member.message('member')` で会員情報自動入力）
 - **`MEMBER_APP_URL` が未設定** → Recoreから承認後にURLが発行される
@@ -346,3 +358,11 @@ Claude Code 起動時に自動で読み込まれるファイルです。
 |------|-------------|---------|
 | ダンボール手書き廃止・見積書印刷同封方式に統一 | `index.html` | ご利用方法Step3/4・申込完了の次にやることStep2・見積書注意事項から「受付IDをダンボールに記載」指示を削除 |
 | 遊戯王カテゴリ追加（タブ非表示バグ修正） | `app.js` `index.html` | `CATEGORIES` に `yugioh` を追加、データ読み込みに追加、タブボタンを追加 |
+
+### 2026-02-28（本セッション）
+
+| 依頼 | 対応ファイル | 変更内容 |
+|------|-------------|---------|
+| Recore API仕様書・eKYC・導入フローを記録 | `CLAUDE.md` | 仕様書レビュー結果（birthdate/offer_comment/bank_code等の正式フィールド名）、現コードとの差異3点をTODOに追記、eKYC費用・手順・宅配買取8ステップ進捗を記録 |
+| 申請者名と口座名義の一致チェックを追加 | `app.js` | 古物営業法に基づく本人確認バリデーション。`normalizeKana()`で表記ゆれを吸収し、利用規約表示前・送信直前の2段階でチェック |
+| 申込後30分以内の変更フローを実装 | `app.js` `index.html` `style.css` `api/update-offer.js` | 変更フロー詳細は下記参照 |
