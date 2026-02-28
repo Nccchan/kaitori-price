@@ -1060,6 +1060,11 @@ function closeCheckoutModal() {
   const el = document.getElementById('checkoutModal');
   if (el) el.hidden = true;
   setModalOpen(false);
+  // 変更モードでキャンセルした場合はバナーを再表示
+  if (_modificationMode) {
+    _modificationMode = false;
+    checkModificationWindow();
+  }
 }
 
 // ===== 変更モード状態 =====
@@ -1146,6 +1151,11 @@ function startModification() {
   }
   _modificationMode = true;
   _pendingModData = data;
+
+  // バナーを閉じてからモーダルを開く
+  const banner = document.getElementById('modificationBanner');
+  if (banner) banner.hidden = true;
+  if (_modCountdownTimer) { clearInterval(_modCountdownTimer); _modCountdownTimer = null; }
 
   // カートを申込時の内容に戻す
   cart = data.cartSnapshot.map(c => ({ ...c }));
