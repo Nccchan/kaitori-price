@@ -1065,6 +1065,11 @@ function closeCheckoutModal() {
     _modificationMode = false;
     checkModificationWindow();
   }
+  // 変更バナーが表示中ならページ先頭にスクロールして見えるようにする
+  const modBanner = document.getElementById('modificationBanner');
+  if (modBanner && !modBanner.hidden) {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
 }
 
 // ===== 変更モード状態 =====
@@ -1093,6 +1098,19 @@ function buildLineContactUrl(caseCode) {
 function showModificationBanner(data) {
   const banner = document.getElementById('modificationBanner');
   if (!banner) return;
+  // showLineExpiredBanner で innerHTML が上書きされている場合はバナー構造を再構築
+  if (!document.getElementById('modBannerCode')) {
+    banner.innerHTML = `
+      <div class="mod-banner__body">
+        <span class="mod-banner__icon">✏️</span>
+        <span class="mod-banner__text">申込（受付ID: <strong id="modBannerCode"></strong>）を変更できます</span>
+        <span id="modBannerTimer" class="mod-banner__timer"></span>
+      </div>
+      <div class="mod-banner__actions">
+        <button class="mod-banner__btn" type="button" onclick="startModification()">変更する</button>
+        <button class="mod-banner__close" type="button" onclick="dismissModificationBanner()" aria-label="閉じる">×</button>
+      </div>`;
+  }
   const codeEl = document.getElementById('modBannerCode');
   if (codeEl) codeEl.textContent = data.caseCode || '受付ID確認中';
   banner.classList.remove('mod-banner--expired');
