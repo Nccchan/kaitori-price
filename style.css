@@ -465,7 +465,7 @@ html.is-modal-open,body.is-modal-open{overflow:hidden}
 .howto__campaign-notes div{font-size:12px;color:var(--muted);line-height:1.6}
 
 /* 郵便番号自動入力ボタン */
-.postal-lookup-btn{background:var(--primary);color:#fff;border:none;border-radius:var(--radius);padding:10px 14px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;height:44px;align-self:flex-end}
+.postal-lookup-btn{background:var(--accent);color:#fff;border:none;border-radius:var(--radius);padding:10px 14px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;height:44px;align-self:flex-end}
 .postal-lookup-btn:disabled{opacity:0.6;cursor:not-allowed}
 
 /* フォームヒント */
