@@ -1411,7 +1411,7 @@ async function submitCheckout() {
       ['co_last_name', 'テスト'], ['co_first_name', '太郎'],
       ['co_last_kana', 'テスト'], ['co_first_kana', 'タロウ'],
       ['co_sex', 'MALE'], ['co_tel', '09000000000'],
-      ['co_postal_code', '9400878'], ['co_prefecture', '新潟県'],
+      ['co_postal_code', '9400833'], ['co_prefecture', '新潟県'],
       ['co_address1', '長岡市笹崎'], ['co_address2', '1-8-22'],
       ['co_bank_name', 'テスト銀行'], ['co_bank_branch', '本店'],
       ['co_birthday', '1990-01-01'],
