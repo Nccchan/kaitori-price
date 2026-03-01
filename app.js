@@ -14,6 +14,11 @@ const EKYC_URL = '';
 // 設定するとキャンセル・変更案内のLINEボタンが有効になります
 const LINE_CONTACT_URL = '';
 
+// セルフィー提出Googleフォームのページ公開URL
+// 受付IDと本人確認写真（セルフィー）を収集するGoogleフォームを作成し、URLを設定してください
+// 設定すると申込完了画面に「セルフィーを提出する」ボタンが表示されます
+const SELFIE_FORM_URL = '';
+
 // ===== フロントエンド会員情報（localStorage）=====
 const MEMBER_STORAGE_KEY = 'nikoniko_member';
 
@@ -1016,9 +1021,11 @@ function openCheckoutModal() {
   const submitBtn = document.getElementById('checkoutSubmit');
   if (form) form.hidden = false;
   if (done) done.hidden = true;
-  // セルフィー確認チェックをリセット（モーダルを開くたびに必ず確認させる）
+  // 確認チェックをリセット（モーダルを開くたびに必ず確認させる）
   const selfieCheck = document.getElementById('selfieConfirmCheck');
+  const ageCheck = document.getElementById('ageConfirmCheck');
   if (selfieCheck) selfieCheck.checked = false;
+  if (ageCheck) ageCheck.checked = false;
   if (submitBtn) submitBtn.disabled = true;
 
   // 価格変動があれば警告を表示
@@ -1724,11 +1731,15 @@ function wireCart() {
   document.getElementById('checkoutModalClose')?.addEventListener('click', closeCheckoutModal);
   document.getElementById('checkoutSubmit')?.addEventListener('click', openTermsModal);
   document.getElementById('savedMemberClear')?.addEventListener('click', clearSavedMemberAndForm);
-  // セルフィー確認チェックで送信ボタンを有効化
-  document.getElementById('selfieConfirmCheck')?.addEventListener('change', (e) => {
+  // 年齢・セルフィー確認チェック：両方チェックで送信ボタンを有効化
+  function updateSubmitBtnState() {
+    const age = document.getElementById('ageConfirmCheck')?.checked;
+    const selfie = document.getElementById('selfieConfirmCheck')?.checked;
     const btn = document.getElementById('checkoutSubmit');
-    if (btn) btn.disabled = !e.target.checked;
-  });
+    if (btn) btn.disabled = !(age && selfie);
+  }
+  document.getElementById('ageConfirmCheck')?.addEventListener('change', updateSubmitBtnState);
+  document.getElementById('selfieConfirmCheck')?.addEventListener('change', updateSubmitBtnState);
 
   // 郵便番号 → 住所自動入力
   document.getElementById('postalLookupBtn')?.addEventListener('click', lookupPostalCode);
@@ -1764,13 +1775,15 @@ function wireCart() {
   }
   ekycDoneBtn?.addEventListener('click', closeCheckoutModal);
 
-  // セルフィー送信LINEボタン（LINE_CONTACT_URLが設定されている場合のみ有効化）
+  // セルフィー提出ボタン（Googleフォーム方式・SELFIE_FORM_URLが設定されている場合のみ有効化）
   const selfieSendLineBtn = document.getElementById('selfieSendLineBtn');
-  if (selfieSendLineBtn && LINE_CONTACT_URL) {
+  if (selfieSendLineBtn && SELFIE_FORM_URL) {
     const caseCode = document.getElementById('receiptId')?.textContent || '';
-    const msg = `受付ID「${caseCode}」の本人確認写真を送ります`;
-    const sep = LINE_CONTACT_URL.includes('?') ? '&' : '?';
-    selfieSendLineBtn.href = LINE_CONTACT_URL + sep + 'text=' + encodeURIComponent(msg);
+    const sep = SELFIE_FORM_URL.includes('?') ? '&' : '?';
+    // Googleフォームの受付ID欄を事前入力（entry.XXXXXXXX はフォームのフィールドIDに合わせて変更）
+    selfieSendLineBtn.href = SELFIE_FORM_URL + sep + 'usp=pp_url&entry.受付ID=' + encodeURIComponent(caseCode);
+    selfieSendLineBtn.textContent = '📋 セルフィーを提出する（Googleフォーム）→';
+    selfieSendLineBtn.style.background = '#1a73e8';
     selfieSendLineBtn.hidden = false;
   }
 
