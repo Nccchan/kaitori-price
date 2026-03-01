@@ -1747,6 +1747,16 @@ function wireCart() {
   }
   ekycDoneBtn?.addEventListener('click', closeCheckoutModal);
 
+  // セルフィー送信LINEボタン（LINE_CONTACT_URLが設定されている場合のみ有効化）
+  const selfieSendLineBtn = document.getElementById('selfieSendLineBtn');
+  if (selfieSendLineBtn && LINE_CONTACT_URL) {
+    const caseCode = document.getElementById('receiptId')?.textContent || '';
+    const msg = `受付ID「${caseCode}」の本人確認写真を送ります`;
+    const sep = LINE_CONTACT_URL.includes('?') ? '&' : '?';
+    selfieSendLineBtn.href = LINE_CONTACT_URL + sep + 'text=' + encodeURIComponent(msg);
+    selfieSendLineBtn.hidden = false;
+  }
+
   // バッジ初期化
   updateCartBadge();
 
