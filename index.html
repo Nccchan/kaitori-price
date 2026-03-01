@@ -579,24 +579,31 @@
               <li class="next-steps__item">
                 <div class="next-steps__num">1</div>
                 <div class="next-steps__body">
-                  <div class="next-steps__label">本人確認</div>
+                  <div class="next-steps__label">荷物の中に入れるもの</div>
 
                   <!-- eKYCあり（URLが設定されている場合のみ表示） -->
                   <div id="ekycStep" hidden>
+                    <ul class="packing-list">
+                      <li class="packing-list__item">✅ 商品</li>
+                      <li class="packing-list__item">✅ この見積書（下の見積書を印刷して同封）</li>
+                    </ul>
                     <a id="ekycStartBtn" class="ekyc-start-btn" href="#" target="_blank" rel="noopener noreferrer">🔐 本人確認（eKYC）を開始する →</a>
                     <button id="ekycDoneBtn" class="ekyc-done-btn" type="button">すでに完了している</button>
                     <button id="ekycDeclineBtn" class="next-steps__or-btn" type="button">eKYCを利用しない方はこちら ▼</button>
                   </div>
 
-                  <!-- eKYC未使用時の2ステップ本人確認（eKYCなし=常時表示 / eKYCあり=折りたたみ） -->
+                  <!-- eKYC未使用時（eKYCなし=常時表示 / eKYCあり=折りたたみ） -->
                   <div id="selfieFlow" class="selfie-flow">
-                    <div class="selfie-flow__block selfie-flow__block--docs">
-                      <div class="selfie-flow__block-label">📦 商品と一緒に同梱</div>
-                      <p class="next-steps__desc">3か月以内に取得した<strong>住民票または印鑑証明書写し（原本）＋ 本人確認書類</strong>を商品と同梱してください。<br><small>※ 2回目以降は本人確認書類のみ</small></p>
-                    </div>
-                    <div class="selfie-flow__plus" aria-hidden="true">＋</div>
+                    <ul class="packing-list">
+                      <li class="packing-list__item">✅ 商品</li>
+                      <li class="packing-list__item">✅ この見積書（下の見積書を印刷して同封）</li>
+                      <li class="packing-list__item">
+                        ✅ 本人確認書類
+                        <div class="packing-list__sub">初回：3か月以内の住民票または印鑑証明書写し（原本）＋ 本人確認書類<br>2回目以降：本人確認書類の写しのみ</div>
+                      </li>
+                    </ul>
                     <div class="selfie-flow__block selfie-flow__block--selfie">
-                      <div class="selfie-flow__block-label">🤳 セルフィー写真をLINEで送信（必須）</div>
+                      <div class="selfie-flow__block-label">🤳 セルフィー写真はLINEへ送信（荷物には入れません）</div>
                       <ol class="selfie-flow__steps">
                         <li>本人確認書類（免許証・マイナンバーカード等）を手に持つ</li>
                         <li>顔と書類が両方はっきり写るよう自撮りする</li>
@@ -612,15 +619,15 @@
               <li class="next-steps__item">
                 <div class="next-steps__num">2</div>
                 <div class="next-steps__body">
-                  <div class="next-steps__label">発送</div>
-                  <p class="next-steps__desc">見積書を印刷して商品に同封し、発送してください。</p>
+                  <div class="next-steps__label">着払いで発送</div>
+                  <p class="next-steps__desc">ヤマト運輸の<strong>着払い・翌日午前着</strong>でご発送ください。</p>
                 </div>
               </li>
 
               <li class="next-steps__item">
                 <div class="next-steps__num">3</div>
                 <div class="next-steps__body">
-                  <div class="next-steps__label">追跡番号の連絡</div>
+                  <div class="next-steps__label">追跡番号をLINEへ連絡</div>
                   <p class="next-steps__desc">発送後、必ず<strong>追跡番号をLINEでご連絡</strong>ください。</p>
                 </div>
               </li>
