@@ -1740,10 +1740,19 @@ function wireCart() {
   const ekycStep = document.getElementById('ekycStep');
   const ekycStartBtn = document.getElementById('ekycStartBtn');
   const ekycDoneBtn = document.getElementById('ekycDoneBtn');
+  const ekycDeclineBtn = document.getElementById('ekycDeclineBtn');
+  const selfieFlow = document.getElementById('selfieFlow');
   const ekycUrl = EKYC_URL || (new URLSearchParams(location.search).get('testMode') === '1' ? '#ekyc-test' : '');
   if (ekycUrl) {
+    // eKYC利用可能：eKYCセクションを表示、セルフィーフローは折りたたむ
     if (ekycStep) ekycStep.hidden = false;
     if (ekycStartBtn) ekycStartBtn.href = ekycUrl;
+    if (selfieFlow) selfieFlow.hidden = true;
+    // 「eKYCを利用しない方はこちら」でセルフィーフローを展開
+    ekycDeclineBtn?.addEventListener('click', () => {
+      if (selfieFlow) selfieFlow.hidden = false;
+      ekycDeclineBtn.hidden = true;
+    });
   }
   ekycDoneBtn?.addEventListener('click', closeCheckoutModal);
 

@@ -543,11 +543,11 @@
                   <div id="ekycStep" hidden>
                     <a id="ekycStartBtn" class="ekyc-start-btn" href="#" target="_blank" rel="noopener noreferrer">🔐 本人確認（eKYC）を開始する →</a>
                     <button id="ekycDoneBtn" class="ekyc-done-btn" type="button">すでに完了している</button>
-                    <div class="next-steps__or">eKYCを利用しない場合は↓</div>
+                    <button id="ekycDeclineBtn" class="next-steps__or-btn" type="button">eKYCを利用しない方はこちら ▼</button>
                   </div>
 
-                  <!-- eKYC未使用時の2ステップ本人確認 -->
-                  <div class="selfie-flow">
+                  <!-- eKYC未使用時の2ステップ本人確認（eKYCなし=常時表示 / eKYCあり=折りたたみ） -->
+                  <div id="selfieFlow" class="selfie-flow">
                     <div class="selfie-flow__block selfie-flow__block--docs">
                       <div class="selfie-flow__block-label">📦 商品と一緒に同梱</div>
                       <p class="next-steps__desc">3か月以内に取得した<strong>住民票または印鑑証明書写し（原本）＋ 本人確認書類</strong>を商品と同梱してください。<br><small>※ 2回目以降は本人確認書類のみ</small></p>
