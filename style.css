@@ -378,16 +378,18 @@ html.is-modal-open,body.is-modal-open{overflow:hidden}
 .terms-modal__decline:hover{background:var(--surface)}
 .terms-modal__agree{padding:10px 24px;border-radius:10px;border:none;background:linear-gradient(135deg,rgba(124,58,237,0.92),rgba(59,130,246,0.85));color:#fff;font-weight:900;font-size:14px;cursor:pointer;box-shadow:0 4px 16px rgba(124,58,237,0.25)}
 .terms-modal__agree:hover{opacity:0.9}
-/* スマホ向け：別タブリンク（デスクトップは非表示） */
-.terms-modal__mobile-link{display:none;flex-direction:column;align-items:center;gap:12px;padding:20px 16px;text-align:center;border-bottom:1px solid var(--border)}
-.terms-modal__open-btn{display:inline-block;padding:13px 22px;border-radius:12px;background:#eef2ff;color:#4338ca;font-weight:900;font-size:15px;text-decoration:none;border:2px solid #c7d2fe}
-.terms-modal__mobile-note{font-size:12px;color:var(--muted);line-height:1.6;margin:0}
+.terms-modal__agree:disabled{opacity:0.4;cursor:not-allowed;box-shadow:none}
+/* 利用規約 読み込み中スピナー */
+.terms-loading{display:flex;align-items:center;justify-content:center;width:100%;height:100%;min-height:200px;font-size:14px;color:var(--muted)}
+/* 利用規約 同意チェックボックス */
+.terms-modal__confirm{margin-top:12px;padding:12px 14px;background:#f0fdf4;border-radius:10px;border:2px solid #86efac}
+.terms-modal__confirm-label{display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:14px;font-weight:700;color:#166534;line-height:1.5}
+.terms-modal__confirm-label input[type=checkbox]{width:18px;height:18px;margin-top:2px;flex-shrink:0;accent-color:#16a34a;cursor:pointer}
 @media(max-width:640px){
   .terms-modal{align-items:flex-end}
-  .terms-modal__body{display:none}
-  .terms-modal__mobile-link{display:flex}
-  .terms-modal__panel{border-radius:18px 18px 0 0;width:100%;max-height:92dvh}
-  .terms-modal__policy{overflow-y:auto;max-height:32vh}
+  .terms-modal__panel{border-radius:18px 18px 0 0;width:100%;max-height:93dvh}
+  .terms-modal__policy{overflow-y:auto;max-height:30vh}
+  .terms-modal__body{min-height:200px}
 }
 
 /* ===== AIチャットウィジェット ===== */

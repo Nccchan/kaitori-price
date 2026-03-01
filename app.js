@@ -702,6 +702,8 @@ function getCartSummary() {
   return { count, amount };
 }
 
+let _termsAgreeTime = null; // 利用規約同意日時（申込ごとにリセット）
+
 function buildCommentText(extraComment, bankInfo) {
   const lines = ['【買取申込商品リスト】'];
   for (const item of cart) {
@@ -725,7 +727,66 @@ function buildCommentText(extraComment, bankInfo) {
     lines.push('【お客様備考】');
     lines.push(extraComment.trim());
   }
+  if (_termsAgreeTime) {
+    lines.push('');
+    lines.push(`【利用規約同意】${_termsAgreeTime} (JST) / ウェブ申込`);
+  }
   return lines.join('\n');
+}
+
+// Google Docs 利用規約HTMLをプロキシ経由でフェッチしてsrcdoc iframeに注入
+let _termsCached = null;
+async function loadTermsContent() {
+  const bodyEl = document.getElementById('termsModalBody');
+  const loadingEl = document.getElementById('termsLoading');
+  if (!bodyEl) return;
+
+  // 既にiframeが表示済みならスキップ
+  if (bodyEl.querySelector('iframe')) return;
+
+  const FALLBACK_SRC = 'https://docs.google.com/document/d/e/2PACX-1vS1h6sRK8xDU2h-gFr93PmFFH8B0i5pvL_K-xEIoXI2D1IkfEWbcRx1GE82BTIyJw/pub?embedded=true';
+
+  const injectIframe = (srcdocHtml, fallbackSrc) => {
+    const iframe = document.createElement('iframe');
+    iframe.title = '利用規約';
+    iframe.style.cssText = 'width:100%;height:100%;border:none;display:block;flex:1;';
+    if (srcdocHtml) {
+      iframe.srcdoc = srcdocHtml;
+    } else {
+      iframe.src = fallbackSrc;
+    }
+    if (loadingEl) loadingEl.remove();
+    bodyEl.style.cssText = 'flex:1;overflow:hidden;display:flex;';
+    bodyEl.appendChild(iframe);
+  };
+
+  try {
+    if (!_termsCached) {
+      const res = await fetch('/api/terms-html');
+      if (!res.ok) throw new Error('fetch failed');
+      let html = await res.text();
+      // モバイルで読みやすくするCSS上書きを注入
+      const overrideCSS = `<style>
+        html,body{font-size:15px!important;line-height:1.75!important;color:#1a1a1a!important;
+          padding:14px 16px!important;margin:0!important;max-width:100%!important;
+          word-wrap:break-word!important;overflow-wrap:break-word!important;
+          overflow-y:auto!important;-webkit-overflow-scrolling:touch!important}
+        *{max-width:100%!important;box-sizing:border-box!important}
+        table{width:100%!important;font-size:13px!important}
+        h1,h2,h3{font-size:16px!important;font-weight:900!important;margin:12px 0 6px!important}
+        p{margin:6px 0!important}
+        li{margin:4px 0!important}
+      </style>`;
+      html = html.includes('</head>')
+        ? html.replace('</head>', overrideCSS + '</head>')
+        : overrideCSS + html;
+      _termsCached = html;
+    }
+    injectIframe(_termsCached, null);
+  } catch (e) {
+    // フォールバック：元のGoogle Docs iframeをそのまま使用
+    injectIframe(null, FALLBACK_SRC);
+  }
 }
 
 // -- カートUI --
@@ -1275,7 +1336,16 @@ function openTermsModal() {
   if (errEl) errEl.hidden = true;
 
   const el = document.getElementById('termsModal');
-  if (el) el.hidden = false;
+  if (el) {
+    el.hidden = false;
+    // チェックボックスをリセット・同意ボタンを無効化
+    const cb = document.getElementById('termsReadCheck');
+    const agreeBtn = document.getElementById('termsAgreeBtn');
+    if (cb) cb.checked = false;
+    if (agreeBtn) agreeBtn.disabled = true;
+    // 利用規約本文をGoogle Docs経由で読み込む
+    loadTermsContent();
+  }
 }
 
 function closeTermsModal() {
@@ -1749,7 +1819,14 @@ function wireCart() {
   document.getElementById('termsModalBd')?.addEventListener('click', closeTermsModal);
   document.getElementById('termsModalClose')?.addEventListener('click', closeTermsModal);
   document.getElementById('termsDeclineBtn')?.addEventListener('click', closeTermsModal);
+  // チェックボックスのON/OFFで同意ボタンを制御
+  document.getElementById('termsReadCheck')?.addEventListener('change', e => {
+    const agreeBtn = document.getElementById('termsAgreeBtn');
+    if (agreeBtn) agreeBtn.disabled = !e.target.checked;
+  });
   document.getElementById('termsAgreeBtn')?.addEventListener('click', () => {
+    // 同意日時を記録（JST）
+    _termsAgreeTime = new Date().toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' });
     closeTermsModal();
     submitCheckout();
   });
