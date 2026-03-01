@@ -538,6 +538,7 @@ html.is-modal-open,body.is-modal-open{overflow:hidden}
 .selfie-confirm-box__check{flex-shrink:0;width:18px;height:18px;margin-top:1px;accent-color:#b91c1c;cursor:pointer}
 .selfie-confirm-box__label span{font-size:13px;font-weight:700;color:#b91c1c;line-height:1.6}
 .checkout-submit:disabled{opacity:0.4;cursor:not-allowed}
+.age-confirm-label{display:flex;align-items:center;gap:10px;cursor:pointer;background:rgba(59,130,246,0.05);border:1px solid rgba(59,130,246,0.25);border-radius:8px;padding:12px 14px;margin-bottom:12px;font-size:13px;font-weight:700;color:#1d4ed8}
 
 /* 次にやること：セルフィーフロー */
 .selfie-flow{display:flex;flex-direction:column;gap:0;margin-top:10px}

@@ -200,8 +200,8 @@
         <div class="howto__selfie-alert">
           <div class="howto__selfie-alert__icon">🤳</div>
           <div class="howto__selfie-alert__body">
-            <div class="howto__selfie-alert__title">毎回必須：セルフィー写真のLINE送信</div>
-            <p class="howto__selfie-alert__text">古物営業法（非対面取引規定）により、<strong>本人確認書類を手に持った自撮り写真</strong>をLINEでお送りいただく必要があります。<br>eKYCをご利用の場合は不要です。</p>
+            <div class="howto__selfie-alert__title">毎回必須：セルフィー写真の提出（専用フォームから）</div>
+            <p class="howto__selfie-alert__text">古物営業法（非対面取引規定）により、<strong>本人確認書類を手に持った自撮り写真</strong>を専用フォームからご提出いただく必要があります。<br>eKYCをご利用の場合は不要です。</p>
           </div>
         </div>
 
@@ -209,16 +209,16 @@
           <div class="howto__docs-card howto__docs-card--first">
             <div class="howto__docs-badge">初回のみ</div>
             <ul class="howto__docs-list">
-              <li>本人確認書類（免許証・マイナンバーカード等）</li>
-              <li><strong>＋ 3ヶ月以内に取得した住民票または印鑑証明書写しの原本</strong></li>
-              <li class="howto__docs-selfie">🤳 本人確認書類を手に持った自撮り写真（LINEで送信）</li>
+              <li>本人確認書類（免許証・マイナンバーカード等）の<strong>写し</strong></li>
+              <li><strong>＋ 3ヶ月以内に取得した住民票または印鑑証明書の原本</strong></li>
+              <li class="howto__docs-selfie">🤳 本人確認書類を手に持った自撮り写真（専用フォームから提出）</li>
             </ul>
           </div>
           <div class="howto__docs-card howto__docs-card--repeat">
             <div class="howto__docs-badge">2回目以降</div>
             <ul class="howto__docs-list">
-              <li>本人確認書類のみ</li>
-              <li class="howto__docs-selfie">🤳 本人確認書類を手に持った自撮り写真（LINEで送信）</li>
+              <li>本人確認書類の<strong>写し</strong>のみ</li>
+              <li class="howto__docs-selfie">🤳 本人確認書類を手に持った自撮り写真（専用フォームから提出）</li>
             </ul>
           </div>
         </div>
@@ -229,21 +229,20 @@
             <div class="howto__id-col-title">✅ 使える書類</div>
             <ul class="howto__id-list">
               <li>運転免許証</li>
+              <li>健康保険証</li>
               <li>マイナンバーカード<span class="howto__id-note">（表面のみ・番号は隠してください）</span></li>
               <li>パスポート<span class="howto__id-note">（住所欄に記載があるもの。ない場合は住民票を追加）</span></li>
               <li>在留カード / 特別永住者証明書</li>
-              <li>住民基本台帳カード<span class="howto__id-note">（写真付き）</span></li>
             </ul>
-            <p class="howto__id-rule">※ すべて<strong>有効期限内・住所記載あり</strong>のものに限ります</p>
+            <p class="howto__id-rule">※ <strong>有効期限内</strong>のものに限ります</p>
           </div>
           <div class="howto__id-col howto__id-col--ng">
             <div class="howto__id-col-title">❌ 使えない書類</div>
             <ul class="howto__id-list">
               <li>学生証・社員証</li>
               <li>クレジットカード・キャッシュカード</li>
-              <li>健康保険証<span class="howto__id-note">（住所の記載がないもの）</span></li>
-              <li>期限切れの書類</li>
-              <li>コピー・スキャン・スクリーンショット<span class="howto__id-note">（原本に限ります）</span></li>
+              <li>有効期限切れの書類</li>
+              <li>初回の住民票・印鑑証明書は<strong>コピー不可</strong><span class="howto__id-note">（原本のみ有効）</span></li>
             </ul>
             <p class="howto__id-rule">※ 上記の書類では取引をお断りする場合があります</p>
           </div>
@@ -278,6 +277,7 @@
             <div class="howto__campaign-notes">
               <div>※ 適切なサイズの箱をご使用ください。過度に大きな箱は弊社判断で適用外となる場合があります。</div>
               <div>※ 目安：1梱包60箱（ヤマト12使用時）を超える過剰な分割はお避けください。</div>
+              <div>※ <strong>30箱未満の場合、着払いでご発送いただくと送料が買取金額から差し引かれます。</strong>元払いをおすすめします。</div>
             </div>
           </div>
         </div>
@@ -537,17 +537,22 @@
 
           <div id="checkoutError" class="checkout-error" hidden></div>
 
+          <label class="age-confirm-label">
+            <input type="checkbox" id="ageConfirmCheck" class="selfie-confirm-box__check">
+            <span>私は<strong>18歳以上</strong>です（18歳未満のご利用はできません）</span>
+          </label>
+
           <div class="selfie-confirm-box">
             <div class="selfie-confirm-box__title">🤳 本人確認写真（セルフィー）について</div>
             <ul class="selfie-confirm-box__list">
-              <li>申込完了後、<strong>本人確認書類を手に持った自撮り写真</strong>をLINEでお送りください（古物営業法・非対面取引の本人確認）</li>
-              <li><strong>写真の送信が確認できない場合は取引ができません</strong></li>
+              <li>申込完了後、<strong>本人確認書類を手に持った自撮り写真</strong>を専用フォームからご提出ください（古物営業法・非対面取引の本人確認）</li>
+              <li><strong>写真の提出が確認できない場合は取引ができません</strong></li>
               <li>弊社到着後に取引不可となった場合の<strong>商品返送費用はお客様負担</strong>となります</li>
               <li>eKYCをご利用の場合は不要です</li>
             </ul>
             <label class="selfie-confirm-box__label">
               <input type="checkbox" id="selfieConfirmCheck" class="selfie-confirm-box__check">
-              <span>上記を確認しました。申込完了後にセルフィー写真をLINEで送信します</span>
+              <span>上記を確認しました。申込完了後にセルフィー写真を専用フォームから提出します</span>
             </label>
           </div>
 
@@ -686,14 +691,15 @@
         ></iframe>
       </div>
       <div class="terms-modal__policy">
-        <div class="terms-modal__policy-title">同意内容の要点</div>
+        <div class="terms-modal__policy-title">同意内容の要点（利用規約より抜粋）</div>
         <ul class="terms-modal__policy-list">
-          <li>🤳 申込完了後、<strong>本人確認書類を手に持った自撮り写真</strong>をLINEで送信します（eKYC利用者は不要）</li>
-          <li>📷 写真の送信が確認できない場合は取引不可。弊社到着後に取引不可となった場合の<strong>返送費用はお客様負担</strong>です</li>
-          <li>✏️ 申込後 <strong>30分以内</strong> はサイト上で内容を変更できます</li>
-          <li>💬 30分経過後・発送前の変更は <strong>LINEにてご連絡</strong> ください（受付IDをお知らせください）</li>
-          <li>🚫 発送後のキャンセル・返品はお受けできません</li>
-          <li>⚠️ シール付着・ハードケース入りは <strong>1点200円自動減額</strong>（発送後の取消不可）</li>
+          <li>👤 本サービスは<strong>18歳以上</strong>の方のみご利用いただけます（第2条）</li>
+          <li>🤳 申込完了後、<strong>本人確認書類を手に持った自撮り写真</strong>を専用フォームからご提出ください（eKYC利用者は不要）（第1条）</li>
+          <li>📷 写真の提出が確認できない場合は取引不可。<strong>返送費用はお客様負担</strong>です（第10条）</li>
+          <li>⚠️ シール付着・ハードケース入りは<strong>1点200円自動減額</strong>。発送後の返品・取消不可（第3条）</li>
+          <li>📦 <strong>30箱未満で着払い</strong>発送の場合、送料が買取金額から差し引かれます（第9条）</li>
+          <li>✏️ 申込後<strong>30分以内</strong>はサイト上で内容を変更できます（第4条）</li>
+          <li>🚫 発送後のキャンセル・返品はお受けできません（第6条）</li>
         </ul>
       </div>
       <div class="terms-modal__foot">
