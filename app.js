@@ -1016,7 +1016,10 @@ function openCheckoutModal() {
   const submitBtn = document.getElementById('checkoutSubmit');
   if (form) form.hidden = false;
   if (done) done.hidden = true;
-  if (submitBtn) submitBtn.disabled = false;
+  // セルフィー確認チェックをリセット（モーダルを開くたびに必ず確認させる）
+  const selfieCheck = document.getElementById('selfieConfirmCheck');
+  if (selfieCheck) selfieCheck.checked = false;
+  if (submitBtn) submitBtn.disabled = true;
 
   // 価格変動があれば警告を表示
   if (errEl) {
@@ -1721,6 +1724,11 @@ function wireCart() {
   document.getElementById('checkoutModalClose')?.addEventListener('click', closeCheckoutModal);
   document.getElementById('checkoutSubmit')?.addEventListener('click', openTermsModal);
   document.getElementById('savedMemberClear')?.addEventListener('click', clearSavedMemberAndForm);
+  // セルフィー確認チェックで送信ボタンを有効化
+  document.getElementById('selfieConfirmCheck')?.addEventListener('change', (e) => {
+    const btn = document.getElementById('checkoutSubmit');
+    if (btn) btn.disabled = !e.target.checked;
+  });
 
   // 郵便番号 → 住所自動入力
   document.getElementById('postalLookupBtn')?.addEventListener('click', lookupPostalCode);
@@ -1740,12 +1748,31 @@ function wireCart() {
   const ekycStep = document.getElementById('ekycStep');
   const ekycStartBtn = document.getElementById('ekycStartBtn');
   const ekycDoneBtn = document.getElementById('ekycDoneBtn');
+  const ekycDeclineBtn = document.getElementById('ekycDeclineBtn');
+  const selfieFlow = document.getElementById('selfieFlow');
   const ekycUrl = EKYC_URL || (new URLSearchParams(location.search).get('testMode') === '1' ? '#ekyc-test' : '');
   if (ekycUrl) {
+    // eKYC利用可能：eKYCセクションを表示、セルフィーフローは折りたたむ
     if (ekycStep) ekycStep.hidden = false;
     if (ekycStartBtn) ekycStartBtn.href = ekycUrl;
+    if (selfieFlow) selfieFlow.hidden = true;
+    // 「eKYCを利用しない方はこちら」でセルフィーフローを展開
+    ekycDeclineBtn?.addEventListener('click', () => {
+      if (selfieFlow) selfieFlow.hidden = false;
+      ekycDeclineBtn.hidden = true;
+    });
   }
   ekycDoneBtn?.addEventListener('click', closeCheckoutModal);
+
+  // セルフィー送信LINEボタン（LINE_CONTACT_URLが設定されている場合のみ有効化）
+  const selfieSendLineBtn = document.getElementById('selfieSendLineBtn');
+  if (selfieSendLineBtn && LINE_CONTACT_URL) {
+    const caseCode = document.getElementById('receiptId')?.textContent || '';
+    const msg = `受付ID「${caseCode}」の本人確認写真を送ります`;
+    const sep = LINE_CONTACT_URL.includes('?') ? '&' : '?';
+    selfieSendLineBtn.href = LINE_CONTACT_URL + sep + 'text=' + encodeURIComponent(msg);
+    selfieSendLineBtn.hidden = false;
+  }
 
   // バッジ初期化
   updateCartBadge();
