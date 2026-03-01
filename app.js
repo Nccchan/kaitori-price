@@ -770,12 +770,13 @@ async function loadTermsContent() {
       if (!res.ok) throw new Error('fetch failed');
       let html = await res.text();
       // モバイルで読みやすくするCSS上書きを注入
-      const overrideCSS = `<style>
+      const overrideCSS = `<meta name="viewport" content="width=device-width,initial-scale=1"><style>
         html,body{font-size:15px!important;line-height:1.75!important;color:#1a1a1a!important;
-          padding:14px 16px!important;margin:0!important;max-width:100%!important;
+          padding:8px 14px!important;margin:0!important;width:100%!important;max-width:100%!important;
           word-wrap:break-word!important;overflow-wrap:break-word!important;
           overflow-y:auto!important;-webkit-overflow-scrolling:touch!important}
-        *{max-width:100%!important;box-sizing:border-box!important}
+        *{max-width:100%!important;box-sizing:border-box!important;letter-spacing:normal!important}
+        div{width:auto!important}
         table{width:100%!important;font-size:13px!important}
         h1,h2,h3{font-size:16px!important;font-weight:900!important;margin:12px 0 6px!important}
         p{margin:6px 0!important}
