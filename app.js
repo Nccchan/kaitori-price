@@ -753,14 +753,14 @@ async function loadTermsContent() {
   const injectIframe = (srcdocHtml, fallbackSrc) => {
     const iframe = document.createElement('iframe');
     iframe.title = '利用規約';
-    iframe.style.cssText = 'width:100%;height:100%;border:none;display:block;flex:1;';
+    iframe.style.cssText = 'width:100%;flex:1;border:none;display:block;min-height:0;';
     if (srcdocHtml) {
       iframe.srcdoc = srcdocHtml;
     } else {
       iframe.src = fallbackSrc;
     }
     if (loadingEl) loadingEl.remove();
-    bodyEl.style.cssText = 'flex:1;overflow:hidden;display:flex;';
+    bodyEl.style.cssText = 'flex:1;overflow:hidden;display:flex;flex-direction:column;min-height:0;';
     bodyEl.appendChild(iframe);
   };
 
