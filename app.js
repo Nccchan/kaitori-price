@@ -17,7 +17,7 @@ const LINE_CONTACT_URL = '';
 // セルフィー提出Googleフォームのページ公開URL
 // 受付IDと本人確認写真（セルフィー）を収集するGoogleフォームを作成し、URLを設定してください
 // 設定すると申込完了画面に「セルフィーを提出する」ボタンが表示されます
-const SELFIE_FORM_URL = '';
+const SELFIE_FORM_URL = 'https://forms.gle/vzChdNgwEv3336Qy8';
 
 // ===== フロントエンド会員情報（localStorage）=====
 const MEMBER_STORAGE_KEY = 'nikoniko_member';
