@@ -45,9 +45,9 @@ function clearPendingModification() {
   try { localStorage.removeItem(MODIFICATION_STORAGE_KEY); } catch { /* ignore */ }
 }
 
-function saveMemberToStorage(lastName, firstName, lastKana, firstKana, sex, birthday, tel, email, postalCode, prefecture, address1, address2, bankName, bankBranch, bankType, bankNumber, bankHolder) {
+function saveMemberToStorage(lastName, firstName, lastKana, firstKana, sex, birthday, tel, email, lineName, postalCode, prefecture, address1, address2, bankName, bankBranch, bankType, bankNumber, bankHolder) {
   try {
-    localStorage.setItem(MEMBER_STORAGE_KEY, JSON.stringify({ lastName, firstName, lastKana, firstKana, sex, birthday, tel, email, postalCode, prefecture, address1, address2, bankName, bankBranch, bankType, bankNumber, bankHolder }));
+    localStorage.setItem(MEMBER_STORAGE_KEY, JSON.stringify({ lastName, firstName, lastKana, firstKana, sex, birthday, tel, email, lineName, postalCode, prefecture, address1, address2, bankName, bankBranch, bankType, bankNumber, bankHolder }));
   } catch { /* ignore */ }
 }
 
@@ -60,7 +60,7 @@ function loadMemberFromStorage() {
 
 function clearSavedMemberAndForm() {
   try { localStorage.removeItem(MEMBER_STORAGE_KEY); } catch { /* ignore */ }
-  ['co_last_name', 'co_first_name', 'co_last_kana', 'co_first_kana', 'co_sex', 'co_birthday', 'co_tel', 'co_email', 'co_postal_code', 'co_prefecture', 'co_address1', 'co_address2', 'co_bank_name', 'co_bank_branch', 'co_bank_type', 'co_bank_number', 'co_bank_holder'].forEach(id => {
+  ['co_last_name', 'co_first_name', 'co_last_kana', 'co_first_kana', 'co_sex', 'co_birthday', 'co_tel', 'co_email', 'co_line_name', 'co_postal_code', 'co_prefecture', 'co_address1', 'co_address2', 'co_bank_name', 'co_bank_branch', 'co_bank_type', 'co_bank_number', 'co_bank_holder'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
@@ -704,7 +704,7 @@ function getCartSummary() {
 
 let _termsAgreeTime = null; // 利用規約同意日時（申込ごとにリセット）
 
-function buildCommentText(extraComment, bankInfo) {
+function buildCommentText(extraComment, bankInfo, lineName) {
   const lines = ['【買取申込商品リスト】'];
   for (const item of cart) {
     const sub = item.price * item.quantity;
@@ -721,6 +721,10 @@ function buildCommentText(extraComment, bankInfo) {
     lines.push(`口座種別: ${bankInfo.bankType}`);
     lines.push(`口座番号: ${bankInfo.bankNumber}`);
     lines.push(`口座名義: ${bankInfo.bankHolder}`);
+  }
+  if (lineName) {
+    lines.push('');
+    lines.push(`【LINE表示名】${lineName}`);
   }
   if (extraComment && extraComment.trim()) {
     lines.push('');
@@ -1117,6 +1121,7 @@ function openCheckoutModal() {
     fill('co_birthday', saved.birthday);
     fill('co_tel', saved.tel);
     fill('co_email', saved.email);
+    fill('co_line_name', saved.lineName);
     fill('co_postal_code', saved.postalCode);
     fill('co_prefecture', saved.prefecture);
     fill('co_address1', saved.address1);
@@ -1262,6 +1267,7 @@ function startModification() {
     fill('co_last_kana', fd.lastKana);     fill('co_first_kana', fd.firstKana);
     fill('co_sex', fd.sex);               fill('co_birthday', fd.birthday);
     fill('co_tel', fd.tel);               fill('co_email', fd.email);
+    fill('co_line_name', fd.lineName);
     fill('co_postal_code', fd.postalCode); fill('co_prefecture', fd.prefecture);
     fill('co_address1', fd.address1);     fill('co_address2', fd.address2);
     fill('co_bank_name', fd.bankName);    fill('co_bank_branch', fd.bankBranch);
@@ -1299,6 +1305,8 @@ function openTermsModal() {
   const sex = (document.getElementById('co_sex')?.value || '').trim();
   const birthday = (document.getElementById('co_birthday')?.value || '').trim();
   const tel = (document.getElementById('co_tel')?.value || '').trim();
+  const email = (document.getElementById('co_email')?.value || '').trim();
+  const lineName = (document.getElementById('co_line_name')?.value || '').trim();
   const postalCode = (document.getElementById('co_postal_code')?.value || '').trim();
   const prefecture = (document.getElementById('co_prefecture')?.value || '').trim();
   const address1 = (document.getElementById('co_address1')?.value || '').trim();
@@ -1316,6 +1324,7 @@ function openTermsModal() {
   if (!birthday) errors.push('生年月日を入力してください');
   if (!tel) errors.push('電話番号を入力してください');
   if (tel && !/^0[0-9]{9,10}$/.test(tel)) errors.push('電話番号はハイフンなしの数字のみで入力してください');
+  if (!lineName) errors.push('LINE表示名を入力してください');
   if (!postalCode) errors.push('郵便番号を入力してください');
   if (!prefecture) errors.push('都道府県を選択してください');
   if (!address1) errors.push('市区町村を入力してください');
@@ -1454,7 +1463,11 @@ async function sendReceiptEmail(email, name, receptionId, items) {
     await fetch('/api/send-receipt', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ to: email, name, receptionId, items, ekycUrl: EKYC_URL || null }),
+      body: JSON.stringify({
+        to: email, name, receptionId, items,
+        ekycUrl: EKYC_URL || null,
+        selfieFormUrl: SELFIE_FORM_URL || null,
+      }),
     });
   } catch { /* メール送信失敗は無視（申込自体は成功済み） */ }
 }
@@ -1520,6 +1533,7 @@ async function submitCheckout() {
   const birthday = (document.getElementById('co_birthday')?.value || '').trim();
   let tel = (document.getElementById('co_tel')?.value || '').trim();
   const email = (document.getElementById('co_email')?.value || '').trim();
+  const lineName = (document.getElementById('co_line_name')?.value || '').trim();
   const extraComment = (document.getElementById('co_comment')?.value || '').trim();
   const postalCode = (document.getElementById('co_postal_code')?.value || '').trim();
   const prefecture = (document.getElementById('co_prefecture')?.value || '').trim();
@@ -1578,7 +1592,7 @@ async function submitCheckout() {
 
   // ペイロード構築
   const bankInfo = { bankName, bankBranch, bankType, bankNumber, bankHolder };
-  const comment = buildCommentText(extraComment, bankInfo);
+  const comment = buildCommentText(extraComment, bankInfo, lineName);
   const payload = {
     is_pickup: false,
     last_name: lastName,
@@ -1604,7 +1618,7 @@ async function submitCheckout() {
   if (email) payload.email = email;
   if (_memberJwt) payload.member_jwt = _memberJwt;
 
-  const formDataSnapshot = { lastName, firstName, lastKana, firstKana, sex, birthday, tel, email, postalCode, prefecture, address1, address2, bankName, bankBranch, bankType, bankNumber, bankHolder };
+  const formDataSnapshot = { lastName, firstName, lastKana, firstKana, sex, birthday, tel, email, lineName, postalCode, prefecture, address1, address2, bankName, bankBranch, bankType, bankNumber, bankHolder };
 
   // テストモード（?testMode=1）：APIをスキップして完了画面を表示
   if (isTestMode) {
@@ -1612,7 +1626,7 @@ async function submitCheckout() {
     clearCart();
     const receiptLabel = _modificationMode ? `TEST01（変更）` : 'TEST01';
     renderReceipt(snapshot, receiptLabel);
-    saveMemberToStorage(lastName, firstName, lastKana, firstKana, sex, birthday, tel, email, postalCode, prefecture, address1, address2, bankName, bankBranch, bankType, bankNumber, bankHolder);
+    saveMemberToStorage(lastName, firstName, lastKana, firstKana, sex, birthday, tel, email, lineName, postalCode, prefecture, address1, address2, bankName, bankBranch, bankType, bankNumber, bankHolder);
     sendReceiptEmail(email, `${lastName} ${firstName}`, receiptLabel, snapshot);
     if (_modificationMode) {
       clearPendingModification();
@@ -1673,7 +1687,7 @@ async function submitCheckout() {
     const data = await res.json().catch(() => null);
 
     if (res.ok) {
-      saveMemberToStorage(lastName, firstName, lastKana, firstKana, sex, birthday, tel, email, postalCode, prefecture, address1, address2, bankName, bankBranch, bankType, bankNumber, bankHolder);
+      saveMemberToStorage(lastName, firstName, lastKana, firstKana, sex, birthday, tel, email, lineName, postalCode, prefecture, address1, address2, bankName, bankBranch, bankType, bankNumber, bankHolder);
       clearCart();
       const caseId = data?.id || null;
       const caseCode = data?.code || generateReceiptId();

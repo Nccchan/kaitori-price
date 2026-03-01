@@ -5,7 +5,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { to, name, receptionId, items, ekycUrl } = req.body || {};
+  const { to, name, receptionId, items, ekycUrl, selfieFormUrl } = req.body || {};
   if (!to || !name || !Array.isArray(items) || items.length === 0) {
     return res.status(400).json({ error: 'missing required fields' });
   }
@@ -97,15 +97,44 @@ export default async function handler(req, res) {
               </ul>
             </div>
 
-            ${ekycUrl ? `
-            <!-- eKYC 本人確認 -->
-            <div style="background:#eff6ff;border:2px solid #1a56db;border-radius:8px;padding:20px;margin-top:20px;text-align:center;">
-              <div style="display:inline-block;background:#1a56db;color:#fff;font-size:10px;font-weight:700;letter-spacing:1.5px;padding:2px 8px;border-radius:4px;margin-bottom:10px;">NEXT STEP</div>
-              <div style="font-weight:700;font-size:15px;margin-bottom:6px;">📋 本人確認（eKYC）が必要です</div>
-              <div style="font-size:13px;color:#374151;margin-bottom:16px;">お取引には本人確認が必要です。下のボタンから本人確認を行ってください。</div>
-              <a href="${escHtml(ekycUrl)}" style="display:inline-block;background:#1a56db;color:#fff;padding:13px 28px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px;">本人確認（eKYC）を開始する →</a>
+            <!-- 次にやること -->
+            <div style="background:#f0fdf4;border:2px solid #86efac;border-radius:8px;padding:20px;margin-top:24px;">
+              <div style="font-weight:900;font-size:15px;color:#166534;margin-bottom:16px;">📋 次にやること（3ステップ）</div>
+
+              <!-- Step 1: 本人確認 -->
+              <div style="display:flex;gap:12px;margin-bottom:14px;align-items:flex-start;">
+                <div style="flex-shrink:0;width:26px;height:26px;background:#16a34a;color:#fff;border-radius:50%;font-size:13px;font-weight:900;display:flex;align-items:center;justify-content:center;">1</div>
+                <div style="flex:1;">
+                  <div style="font-weight:700;font-size:14px;color:#166534;margin-bottom:4px;">🤳 本人確認セルフィーを提出する</div>
+                  <div style="font-size:13px;color:#374151;margin-bottom:8px;">本人確認書類を手に持った自撮り写真を専用フォームから提出してください。</div>
+                  ${ekycUrl ? `<a href="${escHtml(ekycUrl)}" style="display:inline-block;background:#1a56db;color:#fff;padding:9px 18px;border-radius:7px;text-decoration:none;font-weight:700;font-size:13px;margin-bottom:6px;">本人確認（eKYC）を開始する →</a><br>` : ''}
+                  ${selfieFormUrl ? `<a href="${escHtml(selfieFormUrl)}" style="display:inline-block;background:#16a34a;color:#fff;padding:9px 18px;border-radius:7px;text-decoration:none;font-weight:700;font-size:13px;">📋 セルフィーを提出する（Googleフォーム）→</a>` : '<div style="font-size:12px;color:#6b7280;">申込完了画面のボタンからフォームを開いてください</div>'}
+                </div>
+              </div>
+
+              <!-- Step 2: 発送 -->
+              <div style="display:flex;gap:12px;margin-bottom:14px;align-items:flex-start;">
+                <div style="flex-shrink:0;width:26px;height:26px;background:#16a34a;color:#fff;border-radius:50%;font-size:13px;font-weight:900;display:flex;align-items:center;justify-content:center;">2</div>
+                <div style="flex:1;">
+                  <div style="font-weight:700;font-size:14px;color:#166534;margin-bottom:4px;">📦 商品を発送する</div>
+                  <div style="font-size:13px;color:#374151;line-height:1.7;">
+                    申込当日便にて発送・翌日弊社着でお手配ください。<br>
+                    <strong>〒940-0833 新潟県長岡市笹崎1-8-22 1階<br>
+                    株式会社AiGIVE 宛　TEL: 070-9126-7304</strong><br>
+                    ヤマト運輸・30箱以上で着払い可（一部地域除く）
+                  </div>
+                </div>
+              </div>
+
+              <!-- Step 3: 追跡番号 -->
+              <div style="display:flex;gap:12px;align-items:flex-start;">
+                <div style="flex-shrink:0;width:26px;height:26px;background:#16a34a;color:#fff;border-radius:50%;font-size:13px;font-weight:900;display:flex;align-items:center;justify-content:center;">3</div>
+                <div style="flex:1;">
+                  <div style="font-weight:700;font-size:14px;color:#166534;margin-bottom:4px;">📨 追跡番号をLINEでお知らせ</div>
+                  <div style="font-size:13px;color:#374151;">発送後、追跡番号（伝票番号）を弊社LINEにメッセージでお送りください。</div>
+                </div>
+              </div>
             </div>
-            ` : ''}
           </td>
         </tr>
 
