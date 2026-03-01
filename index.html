@@ -515,12 +515,21 @@
 
           <div id="checkoutError" class="checkout-error" hidden></div>
 
-          <div class="selfie-prereq">
-            <span class="selfie-prereq__icon">🤳</span>
-            <span class="selfie-prereq__text">申込完了後、<strong>本人確認書類を手に持った自撮り写真</strong>をLINEでお送りいただく必要があります（古物営業法・非対面取引の本人確認）。eKYCをご利用の場合は不要です。</span>
+          <div class="selfie-confirm-box">
+            <div class="selfie-confirm-box__title">🤳 本人確認写真（セルフィー）について</div>
+            <ul class="selfie-confirm-box__list">
+              <li>申込完了後、<strong>本人確認書類を手に持った自撮り写真</strong>をLINEでお送りください（古物営業法・非対面取引の本人確認）</li>
+              <li><strong>写真の送信が確認できない場合は取引ができません</strong></li>
+              <li>弊社到着後に取引不可となった場合の<strong>商品返送費用はお客様負担</strong>となります</li>
+              <li>eKYCをご利用の場合は不要です</li>
+            </ul>
+            <label class="selfie-confirm-box__label">
+              <input type="checkbox" id="selfieConfirmCheck" class="selfie-confirm-box__check">
+              <span>上記を確認しました。申込完了後にセルフィー写真をLINEで送信します</span>
+            </label>
           </div>
 
-          <button id="checkoutSubmit" class="checkout-submit" type="button">利用規約に同意して申し込む</button>
+          <button id="checkoutSubmit" class="checkout-submit" type="button" disabled>利用規約に同意して申し込む</button>
         </div>
 
         <div id="checkoutDone" class="checkout-done" hidden>

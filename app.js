@@ -1016,7 +1016,10 @@ function openCheckoutModal() {
   const submitBtn = document.getElementById('checkoutSubmit');
   if (form) form.hidden = false;
   if (done) done.hidden = true;
-  if (submitBtn) submitBtn.disabled = false;
+  // セルフィー確認チェックをリセット（モーダルを開くたびに必ず確認させる）
+  const selfieCheck = document.getElementById('selfieConfirmCheck');
+  if (selfieCheck) selfieCheck.checked = false;
+  if (submitBtn) submitBtn.disabled = true;
 
   // 価格変動があれば警告を表示
   if (errEl) {
@@ -1721,6 +1724,11 @@ function wireCart() {
   document.getElementById('checkoutModalClose')?.addEventListener('click', closeCheckoutModal);
   document.getElementById('checkoutSubmit')?.addEventListener('click', openTermsModal);
   document.getElementById('savedMemberClear')?.addEventListener('click', clearSavedMemberAndForm);
+  // セルフィー確認チェックで送信ボタンを有効化
+  document.getElementById('selfieConfirmCheck')?.addEventListener('change', (e) => {
+    const btn = document.getElementById('checkoutSubmit');
+    if (btn) btn.disabled = !e.target.checked;
+  });
 
   // 郵便番号 → 住所自動入力
   document.getElementById('postalLookupBtn')?.addEventListener('click', lookupPostalCode);
