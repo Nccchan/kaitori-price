@@ -776,7 +776,7 @@ async function loadTermsContent() {
           word-wrap:break-word!important;overflow-wrap:break-word!important;
           overflow-y:auto!important;-webkit-overflow-scrolling:touch!important}
         *{max-width:100%!important;box-sizing:border-box!important;letter-spacing:normal!important}
-        div{width:auto!important}
+        div{padding-left:0!important;padding-right:0!important;width:auto!important}
         table{width:100%!important;font-size:13px!important}
         h1,h2,h3{font-size:16px!important;font-weight:900!important;margin:12px 0 6px!important}
         p{margin:6px 0!important}
