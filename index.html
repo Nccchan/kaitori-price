@@ -454,6 +454,12 @@
           </div>
 
           <div class="form-field">
+            <label class="form-label" for="co_line_name">LINE表示名<span class="form-required">必須</span></label>
+            <input id="co_line_name" class="form-input" type="text" placeholder="例：田中 太郎" autocomplete="nickname">
+            <div class="form-hint">LINEのプロフィール名（本名でなくて構いません）。ご連絡に使用します。</div>
+          </div>
+
+          <div class="form-field">
             <label class="form-label" for="co_comment">備考（任意）</label>
             <textarea id="co_comment" class="form-input form-textarea" placeholder="何かあればご記入ください"></textarea>
           </div>
@@ -683,22 +689,9 @@
         <div class="terms-modal__title">利用規約</div>
         <button id="termsModalClose" class="terms-modal__close" type="button">閉じる</button>
       </div>
-      <div class="terms-modal__body">
-        <iframe
-          src="https://docs.google.com/document/d/e/2PACX-1vS1h6sRK8xDU2h-gFr93PmFFH8B0i5pvL_K-xEIoXI2D1IkfEWbcRx1GE82BTIyJw/pub?embedded=true"
-          class="terms-modal__iframe"
-          title="利用規約"
-        ></iframe>
-      </div>
-      <!-- スマホ向け：別タブで開くリンク -->
-      <div class="terms-modal__mobile-link">
-        <a
-          href="https://docs.google.com/document/d/e/2PACX-1vS1h6sRK8xDU2h-gFr93PmFFH8B0i5pvL_K-xEIoXI2D1IkfEWbcRx1GE82BTIyJw/pub"
-          target="_blank"
-          rel="noopener"
-          class="terms-modal__open-btn"
-        >📄 利用規約の全文を読む（別タブで開く）</a>
-        <p class="terms-modal__mobile-note">下の要点をご確認いただき、同意いただける場合は「同意して申し込む」を押してください</p>
+      <div class="terms-modal__body" id="termsModalBody">
+        <!-- 利用規約本文：JSでGoogle Docs HTMLを取得しsrcdoc iframeとして描画 -->
+        <div class="terms-loading" id="termsLoading">読み込み中...</div>
       </div>
       <div class="terms-modal__policy">
         <div class="terms-modal__policy-title">同意内容の要点（利用規約より抜粋）</div>
@@ -711,10 +704,16 @@
           <li>✏️ 申込後<strong>30分以内</strong>はサイト上で内容を変更できます（第4条）</li>
           <li>🚫 発送後のキャンセル・返品はお受けできません（第6条）</li>
         </ul>
+        <div class="terms-modal__confirm">
+          <label class="terms-modal__confirm-label">
+            <input type="checkbox" id="termsReadCheck">
+            <span>上記の利用規約を全文読み、内容に同意します</span>
+          </label>
+        </div>
       </div>
       <div class="terms-modal__foot">
         <button id="termsDeclineBtn" class="terms-modal__decline" type="button">キャンセル</button>
-        <button id="termsAgreeBtn" class="terms-modal__agree" type="button">同意して申し込む</button>
+        <button id="termsAgreeBtn" class="terms-modal__agree" type="button" disabled>同意して申し込む</button>
       </div>
     </div>
   </div>

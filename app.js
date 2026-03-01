@@ -17,7 +17,7 @@ const LINE_CONTACT_URL = '';
 // セルフィー提出Googleフォームのページ公開URL
 // 受付IDと本人確認写真（セルフィー）を収集するGoogleフォームを作成し、URLを設定してください
 // 設定すると申込完了画面に「セルフィーを提出する」ボタンが表示されます
-const SELFIE_FORM_URL = '';
+const SELFIE_FORM_URL = 'https://forms.gle/vzChdNgwEv3336Qy8';
 
 // ===== フロントエンド会員情報（localStorage）=====
 const MEMBER_STORAGE_KEY = 'nikoniko_member';
@@ -45,9 +45,9 @@ function clearPendingModification() {
   try { localStorage.removeItem(MODIFICATION_STORAGE_KEY); } catch { /* ignore */ }
 }
 
-function saveMemberToStorage(lastName, firstName, lastKana, firstKana, sex, birthday, tel, email, postalCode, prefecture, address1, address2, bankName, bankBranch, bankType, bankNumber, bankHolder) {
+function saveMemberToStorage(lastName, firstName, lastKana, firstKana, sex, birthday, tel, email, lineName, postalCode, prefecture, address1, address2, bankName, bankBranch, bankType, bankNumber, bankHolder) {
   try {
-    localStorage.setItem(MEMBER_STORAGE_KEY, JSON.stringify({ lastName, firstName, lastKana, firstKana, sex, birthday, tel, email, postalCode, prefecture, address1, address2, bankName, bankBranch, bankType, bankNumber, bankHolder }));
+    localStorage.setItem(MEMBER_STORAGE_KEY, JSON.stringify({ lastName, firstName, lastKana, firstKana, sex, birthday, tel, email, lineName, postalCode, prefecture, address1, address2, bankName, bankBranch, bankType, bankNumber, bankHolder }));
   } catch { /* ignore */ }
 }
 
@@ -60,7 +60,7 @@ function loadMemberFromStorage() {
 
 function clearSavedMemberAndForm() {
   try { localStorage.removeItem(MEMBER_STORAGE_KEY); } catch { /* ignore */ }
-  ['co_last_name', 'co_first_name', 'co_last_kana', 'co_first_kana', 'co_sex', 'co_birthday', 'co_tel', 'co_email', 'co_postal_code', 'co_prefecture', 'co_address1', 'co_address2', 'co_bank_name', 'co_bank_branch', 'co_bank_type', 'co_bank_number', 'co_bank_holder'].forEach(id => {
+  ['co_last_name', 'co_first_name', 'co_last_kana', 'co_first_kana', 'co_sex', 'co_birthday', 'co_tel', 'co_email', 'co_line_name', 'co_postal_code', 'co_prefecture', 'co_address1', 'co_address2', 'co_bank_name', 'co_bank_branch', 'co_bank_type', 'co_bank_number', 'co_bank_holder'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
@@ -702,7 +702,9 @@ function getCartSummary() {
   return { count, amount };
 }
 
-function buildCommentText(extraComment, bankInfo) {
+let _termsAgreeTime = null; // 利用規約同意日時（申込ごとにリセット）
+
+function buildCommentText(extraComment, bankInfo, lineName) {
   const lines = ['【買取申込商品リスト】'];
   for (const item of cart) {
     const sub = item.price * item.quantity;
@@ -720,12 +722,75 @@ function buildCommentText(extraComment, bankInfo) {
     lines.push(`口座番号: ${bankInfo.bankNumber}`);
     lines.push(`口座名義: ${bankInfo.bankHolder}`);
   }
+  if (lineName) {
+    lines.push('');
+    lines.push(`【LINE表示名】${lineName}`);
+  }
   if (extraComment && extraComment.trim()) {
     lines.push('');
     lines.push('【お客様備考】');
     lines.push(extraComment.trim());
   }
+  if (_termsAgreeTime) {
+    lines.push('');
+    lines.push(`【利用規約同意】${_termsAgreeTime} (JST) / ウェブ申込`);
+  }
   return lines.join('\n');
+}
+
+// Google Docs 利用規約HTMLをプロキシ経由でフェッチしてsrcdoc iframeに注入
+let _termsCached = null;
+async function loadTermsContent() {
+  const bodyEl = document.getElementById('termsModalBody');
+  const loadingEl = document.getElementById('termsLoading');
+  if (!bodyEl) return;
+
+  // 既にiframeが表示済みならスキップ
+  if (bodyEl.querySelector('iframe')) return;
+
+  const FALLBACK_SRC = 'https://docs.google.com/document/d/e/2PACX-1vS1h6sRK8xDU2h-gFr93PmFFH8B0i5pvL_K-xEIoXI2D1IkfEWbcRx1GE82BTIyJw/pub?embedded=true';
+
+  const injectIframe = (srcdocHtml, fallbackSrc) => {
+    const iframe = document.createElement('iframe');
+    iframe.title = '利用規約';
+    iframe.style.cssText = 'width:100%;height:100%;border:none;display:block;flex:1;';
+    if (srcdocHtml) {
+      iframe.srcdoc = srcdocHtml;
+    } else {
+      iframe.src = fallbackSrc;
+    }
+    if (loadingEl) loadingEl.remove();
+    bodyEl.style.cssText = 'flex:1;overflow:hidden;display:flex;';
+    bodyEl.appendChild(iframe);
+  };
+
+  try {
+    if (!_termsCached) {
+      const res = await fetch('/api/terms-html');
+      if (!res.ok) throw new Error('fetch failed');
+      let html = await res.text();
+      // モバイルで読みやすくするCSS上書きを注入
+      const overrideCSS = `<style>
+        html,body{font-size:15px!important;line-height:1.75!important;color:#1a1a1a!important;
+          padding:14px 16px!important;margin:0!important;max-width:100%!important;
+          word-wrap:break-word!important;overflow-wrap:break-word!important;
+          overflow-y:auto!important;-webkit-overflow-scrolling:touch!important}
+        *{max-width:100%!important;box-sizing:border-box!important}
+        table{width:100%!important;font-size:13px!important}
+        h1,h2,h3{font-size:16px!important;font-weight:900!important;margin:12px 0 6px!important}
+        p{margin:6px 0!important}
+        li{margin:4px 0!important}
+      </style>`;
+      html = html.includes('</head>')
+        ? html.replace('</head>', overrideCSS + '</head>')
+        : overrideCSS + html;
+      _termsCached = html;
+    }
+    injectIframe(_termsCached, null);
+  } catch (e) {
+    // フォールバック：元のGoogle Docs iframeをそのまま使用
+    injectIframe(null, FALLBACK_SRC);
+  }
 }
 
 // -- カートUI --
@@ -1056,6 +1121,7 @@ function openCheckoutModal() {
     fill('co_birthday', saved.birthday);
     fill('co_tel', saved.tel);
     fill('co_email', saved.email);
+    fill('co_line_name', saved.lineName);
     fill('co_postal_code', saved.postalCode);
     fill('co_prefecture', saved.prefecture);
     fill('co_address1', saved.address1);
@@ -1201,6 +1267,7 @@ function startModification() {
     fill('co_last_kana', fd.lastKana);     fill('co_first_kana', fd.firstKana);
     fill('co_sex', fd.sex);               fill('co_birthday', fd.birthday);
     fill('co_tel', fd.tel);               fill('co_email', fd.email);
+    fill('co_line_name', fd.lineName);
     fill('co_postal_code', fd.postalCode); fill('co_prefecture', fd.prefecture);
     fill('co_address1', fd.address1);     fill('co_address2', fd.address2);
     fill('co_bank_name', fd.bankName);    fill('co_bank_branch', fd.bankBranch);
@@ -1238,6 +1305,8 @@ function openTermsModal() {
   const sex = (document.getElementById('co_sex')?.value || '').trim();
   const birthday = (document.getElementById('co_birthday')?.value || '').trim();
   const tel = (document.getElementById('co_tel')?.value || '').trim();
+  const email = (document.getElementById('co_email')?.value || '').trim();
+  const lineName = (document.getElementById('co_line_name')?.value || '').trim();
   const postalCode = (document.getElementById('co_postal_code')?.value || '').trim();
   const prefecture = (document.getElementById('co_prefecture')?.value || '').trim();
   const address1 = (document.getElementById('co_address1')?.value || '').trim();
@@ -1255,6 +1324,7 @@ function openTermsModal() {
   if (!birthday) errors.push('生年月日を入力してください');
   if (!tel) errors.push('電話番号を入力してください');
   if (tel && !/^0[0-9]{9,10}$/.test(tel)) errors.push('電話番号はハイフンなしの数字のみで入力してください');
+  if (!lineName) errors.push('LINE表示名を入力してください');
   if (!postalCode) errors.push('郵便番号を入力してください');
   if (!prefecture) errors.push('都道府県を選択してください');
   if (!address1) errors.push('市区町村を入力してください');
@@ -1275,7 +1345,16 @@ function openTermsModal() {
   if (errEl) errEl.hidden = true;
 
   const el = document.getElementById('termsModal');
-  if (el) el.hidden = false;
+  if (el) {
+    el.hidden = false;
+    // チェックボックスをリセット・同意ボタンを無効化
+    const cb = document.getElementById('termsReadCheck');
+    const agreeBtn = document.getElementById('termsAgreeBtn');
+    if (cb) cb.checked = false;
+    if (agreeBtn) agreeBtn.disabled = true;
+    // 利用規約本文をGoogle Docs経由で読み込む
+    loadTermsContent();
+  }
 }
 
 function closeTermsModal() {
@@ -1384,7 +1463,11 @@ async function sendReceiptEmail(email, name, receptionId, items) {
     await fetch('/api/send-receipt', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ to: email, name, receptionId, items, ekycUrl: EKYC_URL || null }),
+      body: JSON.stringify({
+        to: email, name, receptionId, items,
+        ekycUrl: EKYC_URL || null,
+        selfieFormUrl: SELFIE_FORM_URL || null,
+      }),
     });
   } catch { /* メール送信失敗は無視（申込自体は成功済み） */ }
 }
@@ -1450,6 +1533,7 @@ async function submitCheckout() {
   const birthday = (document.getElementById('co_birthday')?.value || '').trim();
   let tel = (document.getElementById('co_tel')?.value || '').trim();
   const email = (document.getElementById('co_email')?.value || '').trim();
+  const lineName = (document.getElementById('co_line_name')?.value || '').trim();
   const extraComment = (document.getElementById('co_comment')?.value || '').trim();
   const postalCode = (document.getElementById('co_postal_code')?.value || '').trim();
   const prefecture = (document.getElementById('co_prefecture')?.value || '').trim();
@@ -1508,7 +1592,7 @@ async function submitCheckout() {
 
   // ペイロード構築
   const bankInfo = { bankName, bankBranch, bankType, bankNumber, bankHolder };
-  const comment = buildCommentText(extraComment, bankInfo);
+  const comment = buildCommentText(extraComment, bankInfo, lineName);
   const payload = {
     is_pickup: false,
     last_name: lastName,
@@ -1534,7 +1618,7 @@ async function submitCheckout() {
   if (email) payload.email = email;
   if (_memberJwt) payload.member_jwt = _memberJwt;
 
-  const formDataSnapshot = { lastName, firstName, lastKana, firstKana, sex, birthday, tel, email, postalCode, prefecture, address1, address2, bankName, bankBranch, bankType, bankNumber, bankHolder };
+  const formDataSnapshot = { lastName, firstName, lastKana, firstKana, sex, birthday, tel, email, lineName, postalCode, prefecture, address1, address2, bankName, bankBranch, bankType, bankNumber, bankHolder };
 
   // テストモード（?testMode=1）：APIをスキップして完了画面を表示
   if (isTestMode) {
@@ -1542,7 +1626,7 @@ async function submitCheckout() {
     clearCart();
     const receiptLabel = _modificationMode ? `TEST01（変更）` : 'TEST01';
     renderReceipt(snapshot, receiptLabel);
-    saveMemberToStorage(lastName, firstName, lastKana, firstKana, sex, birthday, tel, email, postalCode, prefecture, address1, address2, bankName, bankBranch, bankType, bankNumber, bankHolder);
+    saveMemberToStorage(lastName, firstName, lastKana, firstKana, sex, birthday, tel, email, lineName, postalCode, prefecture, address1, address2, bankName, bankBranch, bankType, bankNumber, bankHolder);
     sendReceiptEmail(email, `${lastName} ${firstName}`, receiptLabel, snapshot);
     if (_modificationMode) {
       clearPendingModification();
@@ -1603,7 +1687,7 @@ async function submitCheckout() {
     const data = await res.json().catch(() => null);
 
     if (res.ok) {
-      saveMemberToStorage(lastName, firstName, lastKana, firstKana, sex, birthday, tel, email, postalCode, prefecture, address1, address2, bankName, bankBranch, bankType, bankNumber, bankHolder);
+      saveMemberToStorage(lastName, firstName, lastKana, firstKana, sex, birthday, tel, email, lineName, postalCode, prefecture, address1, address2, bankName, bankBranch, bankType, bankNumber, bankHolder);
       clearCart();
       const caseId = data?.id || null;
       const caseCode = data?.code || generateReceiptId();
@@ -1749,7 +1833,14 @@ function wireCart() {
   document.getElementById('termsModalBd')?.addEventListener('click', closeTermsModal);
   document.getElementById('termsModalClose')?.addEventListener('click', closeTermsModal);
   document.getElementById('termsDeclineBtn')?.addEventListener('click', closeTermsModal);
+  // チェックボックスのON/OFFで同意ボタンを制御
+  document.getElementById('termsReadCheck')?.addEventListener('change', e => {
+    const agreeBtn = document.getElementById('termsAgreeBtn');
+    if (agreeBtn) agreeBtn.disabled = !e.target.checked;
+  });
   document.getElementById('termsAgreeBtn')?.addEventListener('click', () => {
+    // 同意日時を記録（JST）
+    _termsAgreeTime = new Date().toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' });
     closeTermsModal();
     submitCheckout();
   });
