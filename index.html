@@ -693,27 +693,15 @@
         <!-- 利用規約本文：JSでGoogle Docs HTMLを取得しsrcdoc iframeとして描画 -->
         <div class="terms-loading" id="termsLoading">読み込み中...</div>
       </div>
-      <div class="terms-modal__policy">
-        <div class="terms-modal__policy-title">同意内容の要点（利用規約より抜粋）</div>
-        <ul class="terms-modal__policy-list">
-          <li>👤 本サービスは<strong>18歳以上</strong>の方のみご利用いただけます（第2条）</li>
-          <li>🤳 申込完了後、<strong>本人確認書類を手に持った自撮り写真</strong>を専用フォームからご提出ください（eKYC利用者は不要）（第1条）</li>
-          <li>📷 写真の提出が確認できない場合は取引不可。<strong>返送費用はお客様負担</strong>です（第10条）</li>
-          <li>⚠️ シール付着・ハードケース入りは<strong>1点200円自動減額</strong>。発送後の返品・取消不可（第3条）</li>
-          <li>📦 <strong>30箱未満で着払い</strong>発送の場合、送料が買取金額から差し引かれます（第9条）</li>
-          <li>✏️ 申込後<strong>30分以内</strong>はサイト上で内容を変更できます（第4条）</li>
-          <li>🚫 発送後のキャンセル・返品はお受けできません（第6条）</li>
-        </ul>
-        <div class="terms-modal__confirm">
-          <label class="terms-modal__confirm-label">
-            <input type="checkbox" id="termsReadCheck">
-            <span>上記の利用規約を全文読み、内容に同意します</span>
-          </label>
-        </div>
-      </div>
       <div class="terms-modal__foot">
-        <button id="termsDeclineBtn" class="terms-modal__decline" type="button">キャンセル</button>
-        <button id="termsAgreeBtn" class="terms-modal__agree" type="button" disabled>同意して申し込む</button>
+        <label class="terms-modal__confirm-label">
+          <input type="checkbox" id="termsReadCheck">
+          <span>利用規約を読み、内容に同意します</span>
+        </label>
+        <div class="terms-modal__foot-btns">
+          <button id="termsDeclineBtn" class="terms-modal__decline" type="button">キャンセル</button>
+          <button id="termsAgreeBtn" class="terms-modal__agree" type="button" disabled>同意して申し込む</button>
+        </div>
       </div>
     </div>
   </div>
