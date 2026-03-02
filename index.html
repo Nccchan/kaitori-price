@@ -532,7 +532,8 @@
             </div>
             <div class="form-field">
               <label class="form-label" for="co_bank_number">口座番号<span class="form-required">必須</span></label>
-              <input id="co_bank_number" class="form-input" type="text" placeholder="1234567" autocomplete="off" inputmode="numeric" maxlength="8">
+              <input id="co_bank_number" class="form-input" type="text" placeholder="1234567（7桁）" autocomplete="off" inputmode="numeric" maxlength="7">
+              <div class="form-hint">数字7桁。6桁の場合は先頭に0を自動補完します。ハイフン・スペース不要。</div>
             </div>
           </div>
 
@@ -559,6 +560,21 @@
             <label class="selfie-confirm-box__label">
               <input type="checkbox" id="selfieConfirmCheck" class="selfie-confirm-box__check">
               <span>上記を確認しました。申込完了後にセルフィー写真を専用フォームから提出します</span>
+            </label>
+          </div>
+
+          <!-- 利用制限・審査ポリシー同意 -->
+          <div class="refusal-policy-box">
+            <div class="refusal-policy-box__title">⚠️ ご利用制限・審査について</div>
+            <ul class="refusal-policy-box__list">
+              <li>弊社は古物営業法および適法な事業運営のため、お申し込み内容・ご利用状況等に基づき、<strong>弊社および弊社の顧問弁護士を含む関係者による審査</strong>を行う場合があります</li>
+              <li>特に、在留資格をお持ちの外国籍のお客様が継続的にご利用される場合、在留資格・滞在目的・転売目的の有無等の確認が行われることがあります</li>
+              <li>審査の結果、<strong>申請後であっても</strong>弊社の判断によりご利用をお断りする場合があり、弊社は一切の責任を負いません</li>
+              <li>ご利用をお断りした場合、商品は<strong>着払い</strong>にてご返送いたします（返送費用はお客様のご負担となります）</li>
+            </ul>
+            <label class="refusal-policy-box__label">
+              <input type="checkbox" id="refusalPolicyCheck" class="selfie-confirm-box__check">
+              <span>上記の審査・ご利用制限について確認し、同意しました</span>
             </label>
           </div>
 
