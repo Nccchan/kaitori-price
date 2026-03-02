@@ -103,11 +103,11 @@
     "OP-12": "./images/onepiece/OP-12.png",
     "OP-13": "./images/onepiece/OP-13.png",
     "OP-14": "./images/onepiece/OP-14.png",
+    "OP-15": "./images/onepiece/OP-15.png",
     "OPD-2025": "./images/onepiece/OPD-2025.png",
     "PRB-01": "./images/onepiece/PRB-01.png",
     "PRB-02": "./images/onepiece/PRB-02.png",
-    "ST21-014": "./images/onepiece/ST21-014.webp",
-    "OP-15": "./images/onepiece/OP-15.jpg"
+    "ST21-014": "./images/onepiece/ST21-014.webp"
   },
   "dragonball": {
     "FB-01": "./images/dragonball/FB-01.png",
@@ -122,8 +122,8 @@
     "SB-02": "./images/dragonball/SB-02.png"
   },
   "yugioh": {
+    "QCAC": "./images/yugioh/QCAC.png",
     "heros": "./images/yugioh/heros.png",
-    "rivals": "./images/yugioh/rivals.png",
-    "QCAC": "./images/yugioh/QCAC.png"
+    "rivals": "./images/yugioh/rivals.png"
   }
 }
