@@ -1090,8 +1090,10 @@ function openCheckoutModal() {
   // 確認チェックをリセット（モーダルを開くたびに必ず確認させる）
   const selfieCheck = document.getElementById('selfieConfirmCheck');
   const ageCheck = document.getElementById('ageConfirmCheck');
+  const refusalCheck = document.getElementById('refusalPolicyCheck');
   if (selfieCheck) selfieCheck.checked = false;
   if (ageCheck) ageCheck.checked = false;
+  if (refusalCheck) refusalCheck.checked = false;
   if (submitBtn) submitBtn.disabled = true;
 
   // 価格変動があれば警告を表示
@@ -1314,7 +1316,13 @@ function openTermsModal() {
   const bankName = (document.getElementById('co_bank_name')?.value || '').trim();
   const bankBranch = (document.getElementById('co_bank_branch')?.value || '').trim();
   const bankType = (document.getElementById('co_bank_type')?.value || '').trim();
-  const bankNumber = (document.getElementById('co_bank_number')?.value || '').trim();
+  // 口座番号：全角→半角変換・ハイフン/スペース除去・6桁→7桁ゼロ補完
+  let bankNumber = (document.getElementById('co_bank_number')?.value || '')
+    .replace(/[０-９]/g, c => String.fromCharCode(c.charCodeAt(0) - 0xFEE0))
+    .replace(/[^0-9]/g, '');
+  if (bankNumber.length === 6) bankNumber = '0' + bankNumber;
+  const bankNumberEl = document.getElementById('co_bank_number');
+  if (bankNumberEl) bankNumberEl.value = bankNumber;
   const bankHolder = (document.getElementById('co_bank_holder')?.value || '').trim();
   const errors = [];
   if (!lastName) errors.push('氏名（姓）を入力してください');
@@ -1333,6 +1341,7 @@ function openTermsModal() {
   if (!bankBranch) errors.push('支店名を入力してください');
   if (!bankType) errors.push('口座種別を選択してください');
   if (!bankNumber) errors.push('口座番号を入力してください');
+  else if (!/^[0-9]{7}$/.test(bankNumber)) errors.push('口座番号は7桁の数字でご入力ください（6桁の場合は先頭に0が自動補完されます）');
   if (!bankHolder) errors.push('口座名義を入力してください');
   if (lastKana && firstKana && bankHolder) {
     if (normalizeKana(lastKana + firstKana) !== normalizeKana(bankHolder)) {
@@ -1816,15 +1825,17 @@ function wireCart() {
   document.getElementById('checkoutModalClose')?.addEventListener('click', closeCheckoutModal);
   document.getElementById('checkoutSubmit')?.addEventListener('click', openTermsModal);
   document.getElementById('savedMemberClear')?.addEventListener('click', clearSavedMemberAndForm);
-  // 年齢・セルフィー確認チェック：両方チェックで送信ボタンを有効化
+  // 年齢・セルフィー・利用制限ポリシー：全チェックで送信ボタンを有効化
   function updateSubmitBtnState() {
     const age = document.getElementById('ageConfirmCheck')?.checked;
     const selfie = document.getElementById('selfieConfirmCheck')?.checked;
+    const refusal = document.getElementById('refusalPolicyCheck')?.checked;
     const btn = document.getElementById('checkoutSubmit');
-    if (btn) btn.disabled = !(age && selfie);
+    if (btn) btn.disabled = !(age && selfie && refusal);
   }
   document.getElementById('ageConfirmCheck')?.addEventListener('change', updateSubmitBtnState);
   document.getElementById('selfieConfirmCheck')?.addEventListener('change', updateSubmitBtnState);
+  document.getElementById('refusalPolicyCheck')?.addEventListener('change', updateSubmitBtnState);
 
   // 郵便番号 → 住所自動入力
   document.getElementById('postalLookupBtn')?.addEventListener('click', lookupPostalCode);
