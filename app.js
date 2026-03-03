@@ -914,9 +914,10 @@ function handleAddToCart(item, categoryKey) {
 
 // -- カートモーダル --
 
-function openCartModal() {
+async function openCartModal() {
   const el = document.getElementById('cartModal');
   if (!el) return;
+  await checkRecruitmentStatus(); // カートを開くたびに最新ステータスを確認
   renderCartModal();
   el.hidden = false;
   setModalOpen(true);
@@ -1127,6 +1128,12 @@ function validateAndRefreshCartPrices() {
 function openCheckoutModal() {
   const el = document.getElementById('checkoutModal');
   if (!el) return;
+
+  // 募集停止中は申込を遮断
+  if (_recruitmentClosed) {
+    alert('現在、新規お申し込みを一時停止しています。\n再開までしばらくお待ちください。');
+    return;
+  }
 
   // 価格の再検証
   const changed = validateAndRefreshCartPrices();
