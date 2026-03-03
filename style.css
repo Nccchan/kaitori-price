@@ -46,6 +46,16 @@ a{color:inherit}
 /* テストモードバナー */
 .testmode-banner{background:#fbbf24;color:#78350f;font-weight:900;font-size:13px;text-align:center;padding:8px;letter-spacing:.03em}
 
+/* 募集停止バナー */
+.closed-banner{background:#dc2626;color:#fff;padding:0}
+.closed-banner[hidden]{display:none}
+.closed-banner__inner{display:flex;align-items:center;gap:14px;padding:16px 0}
+.closed-banner__icon{font-size:28px;flex-shrink:0}
+.closed-banner__body{display:flex;flex-direction:column;gap:4px}
+.closed-banner__title{font-weight:900;font-size:16px;line-height:1.4}
+.closed-banner__message{font-size:13px;opacity:0.9;line-height:1.5}
+.closed-banner__message:empty{display:none}
+
 /* クイックナビ */
 .quicknav{background:linear-gradient(135deg,rgba(124,58,237,0.08),rgba(59,130,246,0.07));border-bottom:1px solid var(--line);padding:10px 0}
 .quicknav__inner{display:flex;flex-wrap:wrap;gap:8px}

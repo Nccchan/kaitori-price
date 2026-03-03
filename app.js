@@ -105,6 +105,9 @@ const els = {
   shareNoShrink: document.getElementById('shareNoShrink'),
 };
 
+// 募集ステータス（スプレッドシート「設定」シート A1=0 で停止）
+let _recruitmentClosed = false;
+
 let allData = {
   pokemon: { items: [], notices: [] },
   onepiece: { items: [], notices: [] },
@@ -130,6 +133,48 @@ function gvizUrl(sheetName) {
   const base = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq`;
   const params = new URLSearchParams({ tqx: 'out:json', sheet: sheetName });
   return `${base}?${params.toString()}`;
+}
+
+// ===== 募集ステータス管理 =====
+// スプレッドシートの「設定」シート: A1=1(募集中) / A1=0(停止) / B1=停止メッセージ(任意)
+async function checkRecruitmentStatus() {
+  try {
+    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?${new URLSearchParams({ tqx: 'out:json', sheet: '設定' })}`;
+    const ctrl = new AbortController();
+    setTimeout(() => ctrl.abort(), 6000);
+    const res = await fetch(url, { cache: 'no-store', signal: ctrl.signal });
+    if (!res.ok) return;
+    const gviz = parseGviz(await res.text());
+    const row = gviz?.table?.rows?.[0];
+    if (!row) return;
+    const status = row?.c?.[0]?.v;   // A1: 0=停止, 1=募集中
+    const message = row?.c?.[1]?.v ?? ''; // B1: 停止中メッセージ（任意）
+    if (status === 0 || status === '0' || status === false) {
+      applyClosedState(String(message));
+    }
+  } catch (_) { /* ネットワークエラー時は通常表示を維持 */ }
+}
+
+function applyClosedState(message) {
+  _recruitmentClosed = true;
+  const banner = document.getElementById('closedBanner');
+  if (banner) banner.hidden = false;
+  const msgEl = document.getElementById('closedBannerMessage');
+  if (msgEl && message) msgEl.textContent = message;
+  // レンダリング済みのカートボタンを即時無効化
+  document.querySelectorAll('.cartbtn').forEach(disableCartBtn);
+  // カートモーダルの申込ボタンも無効化
+  document.querySelectorAll('.cart-checkout-btn').forEach(btn => {
+    btn.disabled = true;
+    btn.textContent = '現在お申し込みを停止しています';
+  });
+}
+
+function disableCartBtn(btn) {
+  btn.disabled = true;
+  btn.textContent = '受付停止中';
+  btn.style.background = '#9ca3af';
+  btn.style.cursor = 'not-allowed';
 }
 
 function parseGviz(text) {
@@ -447,6 +492,7 @@ function render() {
       cartBtn.textContent = 'カートに追加';
       const catKey = activeCategory;
       cartBtn.addEventListener('click', () => handleAddToCart(it, catKey));
+      if (_recruitmentClosed) disableCartBtn(cartBtn);
       actions.appendChild(cartBtn);
     }
 
@@ -868,9 +914,10 @@ function handleAddToCart(item, categoryKey) {
 
 // -- カートモーダル --
 
-function openCartModal() {
+async function openCartModal() {
   const el = document.getElementById('cartModal');
   if (!el) return;
+  await checkRecruitmentStatus(); // カートを開くたびに最新ステータスを確認
   renderCartModal();
   el.hidden = false;
   setModalOpen(true);
@@ -996,11 +1043,16 @@ function renderCartModal() {
   const checkoutBtn = document.createElement('button');
   checkoutBtn.className = 'cart-checkout-btn';
   checkoutBtn.type = 'button';
-  checkoutBtn.textContent = '申し込む';
-  checkoutBtn.addEventListener('click', () => {
-    closeCartModal();
-    openCheckoutModal();
-  });
+  if (_recruitmentClosed) {
+    checkoutBtn.disabled = true;
+    checkoutBtn.textContent = '現在お申し込みを停止しています';
+  } else {
+    checkoutBtn.textContent = '申し込む';
+    checkoutBtn.addEventListener('click', () => {
+      closeCartModal();
+      openCheckoutModal();
+    });
+  }
 
   const clearBtn = document.createElement('button');
   clearBtn.className = 'cart-clear-btn';
@@ -1076,6 +1128,12 @@ function validateAndRefreshCartPrices() {
 function openCheckoutModal() {
   const el = document.getElementById('checkoutModal');
   if (!el) return;
+
+  // 募集停止中は申込を遮断
+  if (_recruitmentClosed) {
+    alert('現在、新規お申し込みを一時停止しています。\n再開までしばらくお待ちください。');
+    return;
+  }
 
   // 価格の再検証
   const changed = validateAndRefreshCartPrices();
@@ -2067,3 +2125,6 @@ function resetCheckoutModalUI() {
 
 // 変更ウィンドウの確認（ページ読み込み時）
 checkModificationWindow();
+
+// 募集ステータスの確認（ページ読み込み時）
+checkRecruitmentStatus();
