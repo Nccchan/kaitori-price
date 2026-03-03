@@ -41,6 +41,17 @@
     🧪 テストモード：申込はAPIに送信されません
   </div>
 
+  <!-- 募集停止バナー（スプレッドシート「設定」シートのA1=0 のときのみ表示） -->
+  <div id="closedBanner" class="closed-banner" hidden>
+    <div class="container closed-banner__inner">
+      <span class="closed-banner__icon">⛔</span>
+      <div class="closed-banner__body">
+        <div class="closed-banner__title">現在、新規お申し込みを一時停止しています</div>
+        <div id="closedBannerMessage" class="closed-banner__message"></div>
+      </div>
+    </div>
+  </div>
+
   <div id="modificationBanner" class="mod-banner" hidden>
     <div class="mod-banner__body">
       <span class="mod-banner__icon">✏️</span>
