@@ -51,7 +51,7 @@ Claude Code 起動時に自動で読み込まれるファイルです。
 | `ANTHROPIC_API_KEY` | AIチャットボット | 設定済み |
 | `RESEND_API_KEY` | 申込完了メール送信 | 設定済み |
 | `RESEND_FROM_EMAIL` | 送信元メールアドレス | `info@aigive.jp` |
-| `RECORE_API_KEY` | Recore買取申込API（`api/submit-offer.js`経由） | **未設定・Recoreから発行されたら設定** |
+| `RECORE_API_KEY` | Recore買取申込API（`api/submit-offer.js`経由） | 設定済み（2026-03-05） |
 
 ローカル開発時は `/home/user/kaitori-price/.env` に同じ変数を設定（gitignore済み）。
 
