@@ -406,10 +406,15 @@ html.is-modal-open,body.is-modal-open{overflow:hidden}
 .chat-widget{position:fixed;bottom:22px;right:18px;z-index:900;display:flex;flex-direction:column;align-items:flex-end;gap:10px}
 
 /* 開閉ボタン */
-.chat-toggle{display:flex;align-items:center;gap:6px;padding:12px 18px;border-radius:999px;border:none;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;font-size:14px;font-weight:800;cursor:pointer;box-shadow:0 6px 24px rgba(109,40,217,0.35);transition:transform 0.15s,box-shadow 0.15s}
-.chat-toggle:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(109,40,217,0.4)}
-.chat-toggle__icon{font-size:18px;line-height:1}
-.chat-toggle__label{letter-spacing:0.3px}
+.chat-toggle{background:none;border:none;padding:0;cursor:pointer;display:flex;align-items:flex-end}
+.chat-toggle:hover .chat-toggle__char{transform:scale(1.07)}
+.chat-toggle__icon{display:flex;align-items:flex-end;gap:10px}
+.chat-toggle__bubble{background:#fff;border-radius:16px 16px 4px 16px;padding:10px 14px;font-size:13px;font-weight:700;color:#333;box-shadow:0 4px 20px rgba(0,0,0,0.18);position:relative;max-width:175px;line-height:1.5;text-align:left;animation:bubbleIn 0.5s cubic-bezier(0.34,1.56,0.64,1)}
+.chat-toggle__bubble::after{content:'';position:absolute;right:-11px;bottom:14px;border:7px solid transparent;border-left-color:#fff}
+.chat-toggle__char{width:66px;height:66px;border-radius:50%;overflow:hidden;flex-shrink:0;position:relative;box-shadow:0 4px 18px rgba(0,0,0,0.22);border:3px solid #fff;transition:transform 0.15s}
+.chat-toggle__char img{width:100%;height:100%;object-fit:cover;display:block}
+.chat-toggle__x{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(109,40,217,0.85);color:#fff;font-size:22px;font-weight:bold;border-radius:50%}
+@keyframes bubbleIn{from{opacity:0;transform:scale(0.85) translateX(12px)}to{opacity:1;transform:scale(1) translateX(0)}}
 
 /* チャットパネル */
 .chat-panel{width:min(360px,calc(100vw - 28px));background:#fff;border-radius:20px;box-shadow:0 20px 60px rgba(15,23,42,0.18);display:flex;flex-direction:column;overflow:hidden;max-height:min(520px,calc(100dvh - 110px))}

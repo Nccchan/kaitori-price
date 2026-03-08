@@ -747,9 +747,18 @@
   <div id="chatWidget" class="chat-widget">
     <!-- 開閉ボタン -->
     <button id="chatToggle" class="chat-toggle" type="button" aria-label="AIヘルプを開く">
-      <span class="chat-toggle__icon chat-toggle__icon--open">💬</span>
-      <span class="chat-toggle__icon chat-toggle__icon--close" hidden>✕</span>
-      <span class="chat-toggle__label">ヘルプ</span>
+      <div class="chat-toggle__icon chat-toggle__icon--open">
+        <div class="chat-toggle__bubble">わからないことはここでチャットできます！</div>
+        <div class="chat-toggle__char">
+          <img src="images/icon_130x130.png" alt="にこにこちゃん">
+        </div>
+      </div>
+      <div class="chat-toggle__icon chat-toggle__icon--close" hidden>
+        <div class="chat-toggle__char">
+          <img src="images/icon_130x130.png" alt="にこにこちゃん">
+          <div class="chat-toggle__x">✕</div>
+        </div>
+      </div>
     </button>
 
     <!-- チャットパネル -->
